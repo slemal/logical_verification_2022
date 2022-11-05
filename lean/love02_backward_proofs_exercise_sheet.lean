@@ -151,9 +151,8 @@ arguments (e.g., `mul_comm _ l`). -/
 lemma add_mul (l m n : ℕ) :
   mul (add l m) n = add (mul n l) (mul n m) :=
 begin
-  induction' n,
-  {  },
-  {  },
+  rw mul_comm,
+  rw mul_add,
 end
 
 
@@ -221,7 +220,19 @@ namespace sorry_lemmas
 
 lemma em_of_dn :
   double_negation → excluded_middle :=
-sorry
+begin
+  rw double_negation,
+  rw excluded_middle,
+  intros hdn a,
+  apply hdn,
+  intro hnem,
+  apply hnem,
+  apply or.intro_right,
+  intro ha,
+  apply hnem,
+  apply or.intro_left,
+  exact ha,
+end
 
 end sorry_lemmas
 
