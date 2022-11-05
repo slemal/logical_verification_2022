@@ -19,8 +19,10 @@ namespace LoVe
 1.1 (1 point). Define the function `fib` that computes the Fibonacci
 numbers. -/
 
-def fib : ℕ → ℕ :=
-sorry
+def fib : ℕ → ℕ
+| nat.zero                := 0
+| (nat.succ num.zero)     := 1
+| (nat.succ (nat.succ n)) := (fib n) + (fib (nat.succ n))
 
 /-! 1.2 (0 points). Check that your function works as expected. -/
 
@@ -58,7 +60,8 @@ type inference. -/
 
 #eval reverse ([] : list ℕ)   -- expected: []
 #eval reverse [1, 3, 5]       -- expected: [5, 3, 1]
--- invoke `#eval` here
+#eval reverse ['r', 'e', 'v', 'e', 'r', 's', 'e', 'd']
+#eval reverse ['l', 'a', 'm', 'a', 'r', 'i', 'e', 'i', 'r', 'a', 'm', 'a', 'l']
 
 /-! 2.2 (2 points). State (without proving them) the following properties of
 `append₂` and `reverse`. Schematically:
@@ -74,7 +77,13 @@ Hint: Take a look at `reverse_reverse` from the demonstration file. -/
 
 #check sorry_lemmas.reverse_reverse
 
--- enter your lemma statements here
+lemma append₂_assoc {α : Type} (xs ys zs : list α) :
+  append₂ (append₂ xs ys) zs = append₂ xs (append₂ ys zs) :=
+sorry
+
+lemma reverse_append₂ {α : Type} (xs ys : list α) :
+  reverse (append₂ xs ys) = append₂ (reverse ys) (reverse xs) :=
+sorry
 
 
 /-! ## Question 3 (5 points): λ-Terms
@@ -91,16 +100,16 @@ while constructing a term. By hovering over `_`, you will see the current
 logical context. -/
 
 def B : (α → β) → (γ → α) → γ → β :=
-sorry
+λ f g c, f (g c)
 
 def S : (α → β → γ) → (α → β) → α → γ :=
-sorry
+λ f g a, f a (g a)
 
 def more_nonsense : (γ → (α → β) → α) → γ → β → α :=
-sorry
+λ f c b, f c (λ a, b)
 
 def even_more_nonsense : (α → α → β) → (β → γ) → α → β → γ :=
-sorry
+λ f g a b, g b
 
 /-! 3.2 (1 point). Complete the following definition.
 
@@ -110,7 +119,7 @@ follow the procedure described in the Hitchhiker's Guide.
 Note: Peirce is pronounced like the English word "purse". -/
 
 def weak_peirce : ((((α → β) → α) → α) → β) → β :=
-sorry
+λ f, f (λ g, g (λ a, f (λ h, a)))
 
 /-! 3.3 (2 points). Show the typing derivation for your definition of `S` above,
 using ASCII or Unicode art. You might find the characters `–` (to draw
@@ -118,6 +127,21 @@ horizontal bars) and `⊢` useful.
 
 Feel free to introduce abbreviations to avoid repeating large contexts `C`. -/
 
--- write your solution here
+/-!
+Let Γ be the context f : α → β → γ, g : α → β, a = α.
+
+-----------------Var    ---------Var    -------------Var    ---------Var
+Γ ⊢ f : α → β → γ       Γ ⊢ a : α       Γ ⊢ g : α → β       Γ ⊢ a : α 
+---------------------------------App    -----------------------------App
+            Γ ⊢ f a : β → γ                     Γ ⊢ g a : β
+            -----------------------------------------------App
+                            Γ ⊢ f a (g a) : γ 
+            -------------------------------------------------Lam
+            f : α → β → γ, g : α → β ⊢ λ a, f a (g a) : α → γ
+            --------------------------------------------------Lam
+            f : α → β → γ ⊢ λ g a, f a (g a) : (α → β) → α → γ
+            ----------------------------------------------------Lam
+            ⊢ λ f g a, f a (g a) : (α → β → γ) → (α → β) → α → γ
+-/
 
 end LoVe
