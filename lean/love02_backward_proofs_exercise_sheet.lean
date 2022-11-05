@@ -21,35 +21,61 @@ Section 2.3 in the Hitchhiker's Guide. -/
 
 lemma I (a : Prop) :
   a → a :=
-sorry
+begin
+  intro ha,
+  exact ha,
+end
 
 lemma K (a b : Prop) :
   a → b → b :=
-sorry
+begin
+  intros ha hb,
+  exact hb,
+end
 
 lemma C (a b c : Prop) :
   (a → b → c) → b → a → c :=
-sorry
+begin
+  intros habc hb ha,
+  apply habc,
+  exact ha,
+  exact hb,
+end
 
 lemma proj_1st (a : Prop) :
   a → a → a :=
-sorry
+begin
+  intros ha hb,
+  exact ha,
+end
 
 /-! Please give a different answer than for `proj_1st`: -/
 
 lemma proj_2nd (a : Prop) :
   a → a → a :=
-sorry
+begin
+  intros ha hb,
+  exact hb,
+end
 
 lemma some_nonsense (a b c : Prop) :
   (a → b → c) → a → (a → c) → b → c :=
-sorry
+begin
+  intros habc ha hac hb,
+  apply hac,
+  exact ha,
+end
 
 /-! 1.2. Prove the contraposition rule using basic tactics. -/
 
 lemma contrapositive (a b : Prop) :
   (a → b) → ¬ b → ¬ a :=
-sorry
+begin
+  intros hab hbn ha,
+  apply hbn,
+  apply hab,
+  exact ha,
+end
 
 /-! 1.3. Prove the distributivity of `∀` over `∧` using basic tactics.
 
@@ -59,7 +85,21 @@ necessary. -/
 
 lemma forall_and {α : Type} (p q : α → Prop) :
   (∀x, p x ∧ q x) ↔ (∀x, p x) ∧ (∀x, q x) :=
-sorry
+begin
+  apply iff.intro,
+  { intro hfa,
+    apply and.intro,
+    { intro x,
+      apply and.elim_left,
+      exact hfa x, },
+    { intro x,
+      apply and.elim_right,
+      exact hfa x, } },
+  { intros hdis x,
+    apply and.intro,
+    { apply and.elim_left hdis, },
+    { apply and.elim_right hdis, } }
+end
 
 
 /-! ## Question 2: Natural Numbers
@@ -71,22 +111,38 @@ sorry
 
 lemma mul_zero (n : ℕ) :
   mul 0 n = 0 :=
-sorry
+begin
+  induction' n,
+  { refl, },
+  { simp [mul, add, ih], },
+end
 
 lemma mul_succ (m n : ℕ) :
   mul (nat.succ m) n = add (mul m n) n :=
-sorry
+begin
+  induction' n,
+  { refl, },
+  { simp [mul, add, ih, add_succ, add_assoc], },
+end
 
 /-! 2.2. Prove commutativity and associativity of multiplication using the
 `induction'` tactic. Choose the induction variable carefully. -/
 
 lemma mul_comm (m n : ℕ) :
   mul m n = mul n m :=
-sorry
+begin
+  induction' n,
+  { simp [mul, mul_zero], },
+  { simp [mul, mul_succ, ih, add_comm], },
+end
 
 lemma mul_assoc (l m n : ℕ) :
   mul (mul l m) n = mul l (mul m n) :=
-sorry
+begin
+  induction' n,
+  { simp [mul], },
+  { simp [mul, ih, mul_add], },
+end
 
 /-! 2.3. Prove the symmetric variant of `mul_add` using `rw`. To apply
 commutativity at a specific position, instantiate the rule by passing some
@@ -94,7 +150,11 @@ arguments (e.g., `mul_comm _ l`). -/
 
 lemma add_mul (l m n : ℕ) :
   mul (add l m) n = add (mul n l) (mul n m) :=
-sorry
+begin
+  induction' n,
+  {  },
+  {  },
+end
 
 
 /-! ## Question 3 (**optional**): Intuitionistic Logic
@@ -124,13 +184,36 @@ and similarly for `peirce`. -/
 
 lemma peirce_of_em :
   excluded_middle → peirce :=
-sorry
+begin
+  rw excluded_middle,
+  rw peirce,
+  intros hem a b,
+  intro haba,
+  apply or.elim,
+  apply hem a,
+  { intro ha,
+    exact ha, },
+  { intro hna,
+    apply haba,
+    intro ha,
+    apply false.elim,
+    exact hna ha, },
+end
 
 /-! 3.2 (**optional**). Prove the following implication using tactics. -/
 
 lemma dn_of_peirce :
   peirce → double_negation :=
-sorry
+begin
+  rw peirce,
+  rw double_negation,
+  intros hp a,
+  intro hnna,
+  apply hp a false,
+  intro hna,
+  apply false.elim,
+  exact hnna hna,
+end
 
 /-! We leave the remaining implication for the homework: -/
 
