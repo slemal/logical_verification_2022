@@ -16,55 +16,87 @@ namespace LoVe
 
 lemma I (a : Prop) :
   a → a :=
-sorry
+assume ha,
+show a, from
+  ha
 
 lemma K (a b : Prop) :
   a → b → b :=
-sorry
+assume ha hb,
+show b, from
+  hb
 
 lemma C (a b c : Prop) :
   (a → b → c) → b → a → c :=
-sorry
+assume habc hb ha,
+show c, from
+  habc ha hb
 
 lemma proj_1st (a : Prop) :
   a → a → a :=
-sorry
+assume ha _,
+show a, from
+  ha
 
 /-! Please give a different answer than for `proj_1st`. -/
 
 lemma proj_2nd (a : Prop) :
   a → a → a :=
-sorry
+assume _ ha,
+show a, from
+  ha
 
 lemma some_nonsense (a b c : Prop) :
   (a → b → c) → a → (a → c) → b → c :=
-sorry
+assume habc ha hac hb,
+show c, from
+  hac ha
 
 /-! 1.2. Supply a structured proof of the contraposition rule. -/
 
 lemma contrapositive (a b : Prop) :
   (a → b) → ¬ b → ¬ a :=
-sorry
+assume hab hnb ha,
+show false, from
+  hnb (hab ha)
 
 /-! 1.3. Supply a structured proof of the distributivity of `∀` over `∧`. -/
 
 lemma forall_and {α : Type} (p q : α → Prop) :
   (∀x, p x ∧ q x) ↔ (∀x, p x) ∧ (∀x, q x) :=
-sorry
+iff.intro
+  (assume hfa,
+   and.intro
+   (fix x,
+    show p x, from
+      and.elim_left (hfa x))
+   (fix x,
+    show q x, from
+      and.elim_right (hfa x)))
+  (assume hand,
+   fix x,
+   and.intro
+   (and.elim_left hand x)
+   (and.elim_right hand x))
 
 /-! 1.4 (**optional**). Reuse, if possible, the lemma `forall_and` from question
 1.3 to prove the following instance of the lemma. -/
 
 lemma forall_and_inst {α : Type} (r s : α → α → Prop) :
   (∀x, r x x ∧ s x x) ↔ (∀x, r x x) ∧ (∀x, s x x) :=
-sorry
+forall_and (λ x, r x x) (λ x, s x x)
 
 /-! 1.5. Supply a structured proof of the following property, which can be used
 to pull a `∀`-quantifier past an `∃`-quantifier. -/
 
 lemma forall_exists_of_exists_forall {α : Type} (p : α → α → Prop) :
   (∃x, ∀y, p x y) → (∀y, ∃x, p x y) :=
-sorry
+assume hef,
+fix y,
+exists.elim hef
+fix a,
+assume hfa,
+exists.intro a (hfa y)
 
 
 /-! ## Question 2: Chain of Equalities
