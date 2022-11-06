@@ -114,7 +114,15 @@ Hint: You might need the tactics `simp` and `cc` and the lemmas `mul_add`,
 
 lemma binomial_square (a b : ℕ) :
   (a + b) * (a + b) = a * a + 2 * a * b + b * b :=
-sorry
+calc  (a + b) * (a + b)
+    = a * (a + b) + b * (a + b) :
+  by rw add_mul
+... = a * a + a * b + b * a + b * b :
+  by simp [mul_add, add_assoc]
+... = a * a + a * b + a * b + b * b :
+  by simp [mul_comm]
+... = a * a + 2 * a * b + b * b :
+  by simp [two_mul, add_mul, add_assoc]
 
 /-! 2.2 (**optional**). Prove the same argument again, this time as a structured
 proof, with `have` steps corresponding to the `calc` equations. Try to reuse as
@@ -129,7 +137,10 @@ sorry
 lemma binomial_square₃ (a b : ℕ) :
   (a + b) * (a + b) = a * a + 2 * a * b + b * b :=
 begin
-  sorry
+  rw add_mul,
+  simp [mul_add, add_assoc],
+  simp [two_mul, add_mul, add_assoc],
+  simp [mul_comm],
 end
 
 
