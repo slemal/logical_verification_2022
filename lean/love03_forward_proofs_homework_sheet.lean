@@ -49,7 +49,25 @@ rules for `∃`, `∧`, and `↔`. -/
 
 lemma exists_and_commute {α : Type} (p q : α → Prop) :
   (∃x, p x ∧ q x) ↔ (∃x, q x ∧ p x) :=
-sorry
+have exists_and_commute_one_way : (∀p q : α → Prop, (∃x, p x ∧ q x) → (∃x, q x ∧ p x)) :=
+  fix p q,
+  assume he,
+  have fee : (∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x)) → (∃x, q x ∧ p x) :=
+    exists.elim he,
+  have fe : ∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x) :=
+    fix a,
+    assume hpq,
+    have hpa : p a :=
+      and.elim_left hpq,
+    have hqa : q a :=
+      and.elim_right hpq,
+    have hqp : q a ∧ p a :=
+      and.intro hqa hpa,
+    show ∃x, q x ∧ p x, from
+      @exists.intro α (λx, q x ∧ p x) a hqp,
+  show (∃x, q x ∧ p x), from
+    fee fe,
+iff.intro (exists_and_commute_one_way p q) (exists_and_commute_one_way q p)
 
 
 /-! ## Question 2 (3 points): Fokkink Logic Puzzles
