@@ -27,15 +27,19 @@ namespace backward_proofs
 
 lemma peirce_of_dn :
   double_negation → peirce :=
-sorry
+assume hdn,
+peirce_of_em (sorry_lemmas.em_of_dn hdn)
 
 lemma em_of_peirce :
   peirce → excluded_middle :=
-sorry
+assume hpi,
+sorry_lemmas.em_of_dn (dn_of_peirce hpi)
+
 
 lemma dn_of_em :
   excluded_middle → double_negation :=
-sorry
+assume hem,
+dn_of_peirce (peirce_of_em hem)
 
 end backward_proofs
 
@@ -75,13 +79,28 @@ Hint: There is an easy way. -/
 
 lemma weak_peirce₂ :
   ∀a b : Prop, ((((a → b) → a) → a) → b) → b :=
-sorry
+λa b f, f (λg, g (λa, f (λh, a)))
 
 /-! 2.2 (2 points). Prove the same Fokkink lemma again, this time by providing a
 structured proof, with `assume`s and `show`s. -/
 
 lemma weak_peirce₃ :
   ∀a b : Prop, ((((a → b) → a) → a) → b) → b :=
-sorry
+fix a b,
+assume f : ((((a → b) → a) → a) → b),
+have farg : (((a → b) → a) → a) :=
+  assume g : ((a → b) → a),
+  have garg : (a → b) :=
+    assume aa : a,
+    have fbrg : (((a → b) → a) → a) :=
+      assume h : ((a → b) → a),
+      show a, from
+        aa,
+    show b, from
+      f fbrg,
+  show a, from
+    g garg,
+show b, from
+  f farg      
 
 end LoVe
