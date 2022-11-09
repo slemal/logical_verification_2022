@@ -84,7 +84,7 @@ iff.intro
 
 lemma forall_and_inst {α : Type} (r s : α → α → Prop) :
   (∀x, r x x ∧ s x x) ↔ (∀x, r x x) ∧ (∀x, s x x) :=
-forall_and (λ x, r x x) (λ x, s x x)
+forall_and (λx, r x x) (λx, s x x)
 
 /-! 1.5. Supply a structured proof of the following property, which can be used
 to pull a `∀`-quantifier past an `∃`-quantifier. -/
@@ -170,7 +170,7 @@ lemma proof_of_false :
   false :=
 begin
   have wi : (∀x, x = true ∧ true) ↔ true :=
-    @forall.one_point_wrong Prop true (λ _, true),
+    @forall.one_point_wrong Prop true (λ_, true),
   simp at wi,
   exact wi false,
 end
@@ -185,7 +185,7 @@ lemma proof_of_false₂ :
   false :=
 begin
   have wi : (∃x : Prop, x = true → false) ↔ false :=
-    @exists.one_point_wrong Prop true (λ _, false),
+    @exists.one_point_wrong Prop true (λ_, false),
   simp at wi,
   exact wi false,
 end
