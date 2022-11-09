@@ -130,7 +130,21 @@ much of the above proof idea as possible, proceeding mechanically. -/
 
 lemma binomial_square₂ (a b : ℕ) :
   (a + b) * (a + b) = a * a + 2 * a * b + b * b :=
-sorry
+have h1 : (a + b) * (a + b) = a * (a + b) + b * (a + b) :=
+  by rw add_mul,
+have h2 : a * (a + b) + b * (a + b) = a * a + a * b + b * a + b * b :=
+  by simp [mul_add, add_assoc],
+have h3 : a * a + a * b + b * a + b * b = a * a + a * b + a * b + b * b :=
+  by simp [mul_comm],
+have h4 : a * a + a * b + a * b + b * b = a * a + 2 * a * b + b * b :=
+  by simp [two_mul, add_mul, add_assoc],
+show _, from
+  begin
+    rw h1,
+    rw h2,
+    rw h3,
+    rw h4
+  end
 
 /-! 2.3. Prove the same lemma again, this time using tactics. -/
 
@@ -154,7 +168,12 @@ axiom forall.one_point_wrong {α : Type} {t : α} {p : α → Prop} :
 
 lemma proof_of_false :
   false :=
-sorry
+begin
+  have wi : (∀x, x = true ∧ true) ↔ true :=
+    @forall.one_point_wrong Prop true (λ _, true),
+  simp at wi,
+  exact wi false,
+end
 
 /-! 3.2 (**optional**). Prove that the following wrong formulation of the
 one-point rule for `∃` is inconsistent, using a tactical or structured proof. -/
@@ -164,6 +183,11 @@ axiom exists.one_point_wrong {α : Type} {t : α} {p : α → Prop} :
 
 lemma proof_of_false₂ :
   false :=
-sorry
+begin
+  have wi : (∃x : Prop, x = true → false) ↔ false :=
+    @exists.one_point_wrong Prop true (λ _, false),
+  simp at wi,
+  exact wi false,
+end
 
 end LoVe
