@@ -18,14 +18,20 @@ namespace LoVe
 should apply its argument `f` to all values of type `α` stored in the tree and
 otherwise preserve the tree's structure. -/
 
-def map_btree {α β : Type} (f : α → β) : btree α → btree β :=
-sorry
+def map_btree {α β : Type} (f : α → β) : btree α → btree β
+| btree.empty := btree.empty
+| (btree.node a l r) := btree.node (f a) (map_btree l) (map_btree r)
 
 /-! 1.2 (1 point). Prove the following lemma about your `map_btree` function. -/
 
 lemma map_btree_iden {α : Type} :
   ∀t : btree α, map_btree (λa, a) t = t :=
-sorry
+begin
+  intro t,
+  induction' t,
+  { refl, },
+  { simp [map_btree, ih_t, ih_t_1], },
+end
 
 
 /-! ## Question 2 (4 points): Tail-Recursive Factorials
@@ -52,7 +58,17 @@ yields a too weak induction hypothesis. -/
 
 lemma accufact_1_eq_fact (n : ℕ) :
   accufact 1 n = fact n :=
-sorry
+have accufact_a_eq_fact :
+  ∀a n, accufact a n = a * fact n :=
+  begin
+    intros a n,
+    induction' n,
+    { simp [accufact, fact], },
+    { simp [accufact, fact, ih],
+      simp [←mul_assoc, mul_comm], },
+  end,
+show accufact 1 n = fact n, by
+  simp [accufact_a_eq_fact 1 n]
 
 /-! 2.2 (2 points). Prove the same property as above again, this time as a
 "paper" proof. Follow the guidelines given in question 1.4 of the exercise. -/
@@ -78,12 +94,37 @@ multiplication. -/
 
 lemma sum_upto_eq :
   ∀m : ℕ, 2 * sum_upto (λi, i) m = m * (m + 1) :=
-sorry
+begin
+  intro m,
+  induction' m,
+  { refl, },
+  { simp [sum_upto, ih, mul_add],
+    have foo : (∀n : ℕ, n + 1 = nat.succ n) :=  -- please tell me there is a one line proof instead of this mess
+    begin
+      intro n,
+      refl,
+    end,
+    simp [←foo],
+    simp [mul_add, add_mul, add_assoc],
+    simp [two_mul, add_assoc],
+    simp [←add_assoc],
+    have bar : 2 = 1 + 1 := by refl,
+    simp [bar, ←add_assoc],
+    simp [add_comm] },
+end
 
 /-! 3.2 (1 point). Prove the following property of `sum_upto`. -/
 
 lemma sum_upto_mul (f g : ℕ → ℕ) :
   ∀n : ℕ, sum_upto (λi, f i + g i) n = sum_upto f n + sum_upto g n :=
-sorry
+begin
+  intro n,
+  induction' n,
+  { refl, },
+  { simp [sum_upto, ih],
+    simp [add_assoc],
+    simp [←add_assoc],
+    simp [add_comm], },
+end
 
 end LoVe
