@@ -27,14 +27,17 @@ not strong enough. Start by proving the following generalization (using the
 `induction'` tactic or pattern matching): -/
 
 lemma accurev_eq_reverse_append {α : Type} :
-  ∀as xs : list α, accurev as xs = reverse xs ++ as :=
-sorry
+  ∀as xs : list α, accurev as xs = reverse xs ++ as
+| as []        :=
+by simp [accurev, reverse]
+| as (x :: xs) :=
+by simp [accurev, reverse, accurev_eq_reverse_append (x :: as) xs]
 
 /-! 1.2. Derive the desired equation. -/
 
 lemma accurev_eq_reverse {α : Type} (xs : list α) :
   accurev [] xs = reverse xs :=
-sorry
+by simp [accurev_eq_reverse_append [] xs]
 
 /-! 1.3. Prove the following property.
 
@@ -42,7 +45,7 @@ Hint: A one-line inductionless proof is possible. -/
 
 lemma accurev_accurev {α : Type} (xs : list α) :
   accurev [] (accurev [] xs) = xs :=
-sorry
+by simp [accurev_eq_reverse, reverse_reverse]
 
 /-! 1.4. Prove the following lemma by structural induction, as a "paper" proof.
 This is a good exercise to develop a deeper understanding of how structural
@@ -85,8 +88,10 @@ first `n` elements at the front of a list.
 To avoid unpleasant surprises in the proofs, we recommend that you follow the
 same recursion pattern as for `drop` above. -/
 
-def take {α : Type} : ℕ → list α → list α :=
-sorry
+def take {α : Type} : ℕ → list α → list α
+| 0       _         := []
+| (_ + 1) []        := []
+| (m + 1) (x :: xs) := x :: (take m xs)
 
 #eval take 0 [3, 7, 11]   -- expected: []
 #eval take 1 [3, 7, 11]   -- expected: [3]
@@ -101,12 +106,14 @@ Notice that they are registered as simplification rules thanks to the `@[simp]`
 attribute. -/
 
 @[simp] lemma drop_nil {α : Type} :
-  ∀n : ℕ, drop n ([] : list α) = [] :=
-sorry
+  ∀n : ℕ, drop n ([] : list α) = []
+| 0       := by simp [drop]
+| (_ + 1) := by simp [drop]
 
 @[simp] lemma take_nil {α : Type} :
-  ∀n : ℕ, take n ([] : list α) = [] :=
-sorry
+  ∀n : ℕ, take n ([] : list α) = []
+| 0       := by simp [take]
+| (_ + 1) := by simp [take]
 
 /-! 2.3. Follow the recursion pattern of `drop` and `take` to prove the
 following lemmas. In other words, for each lemma, there should be three cases,
@@ -118,15 +125,20 @@ arguments to `drop`). For the third case, `←add_assoc` might be useful. -/
 lemma drop_drop {α : Type} :
   ∀(m n : ℕ) (xs : list α), drop n (drop m xs) = drop (n + m) xs
 | 0       n xs        := by refl
--- supply the two missing cases here
+| m       n []        := by simp
+| (m + 1) n (x :: xs) := by simp [drop, ←add_assoc, drop_drop m n]
 
 lemma take_take {α : Type} :
-  ∀(m : ℕ) (xs : list α), take m (take m xs) = take m xs :=
-sorry
+  ∀(m : ℕ) (xs : list α), take m (take m xs) = take m xs
+| 0       xs        := by simp [take]
+| m       []        := by simp [take]
+| (m + 1) (x :: xs) := by simp [take, take_take m]
 
 lemma take_drop {α : Type} :
-  ∀(n : ℕ) (xs : list α), take n xs ++ drop n xs = xs :=
-sorry
+  ∀(n : ℕ) (xs : list α), take n xs ++ drop n xs = xs
+| 0       xs        := by simp [take, drop]
+| n       []        := by simp [take, drop]
+| (n + 1) (x :: xs) := by simp [take, drop, take_drop n]
 
 
 /-! ## Question 3: A Type of λ-Terms
@@ -138,14 +150,25 @@ by the following context-free grammar:
            | 'lam' string term   -- λ-expression (e.g., `λx, t`)
            | 'app' term term     -- application (e.g., `t u`) -/
 
--- enter your definition here
+inductive term : Type
+| var : string → term
+| lam : string → term → term
+| app : term → term → term
 
 /-! 3.2. Register a textual representation of the type `term` as an instance of
 the `has_repr` type class. Make sure to supply enough parentheses to guarantee
 that the output is unambiguous. -/
 
 def term.repr : term → string
--- enter your answer here
+| (term.var s)                             := s
+| (term.lam s t)                           := "λ" ++ s ++ "." ++ t.repr
+| (term.app (term.lam s t) (term.app u v)) :=
+  "(" ++ (term.lam s t).repr ++ ") (" ++ (term.app u v).repr ++ ")"
+| (term.app (term.lam s t) u)              :=
+  "(" ++ (term.lam s t).repr ++ ") " ++ u.repr
+| (term.app t (term.app u v))              :=
+  t.repr ++ " (" ++ (term.app u v).repr ++ ")"
+| (term.app t u)                           := t.repr ++ " " ++ u.repr
 
 @[instance] def term.has_repr : has_repr term :=
 { repr := term.repr }
@@ -155,5 +178,10 @@ something like `(λx, ((y x) x))`. -/
 
 #eval (term.lam "x" (term.app (term.app (term.var "y") (term.var "x"))
     (term.var "x")))
+#eval (term.lam "x" (term.app (term.var "y") (term.app (term.var "x")
+    (term.var "x"))))
+#eval (term.lam "x" (term.app (term.lam "y" (term.var "y")) (term.var "x")))
+#eval (term.lam "x" (term.app (term.var "x") (term.lam "y" (term.var "y"))))
+#eval (term.app (term.lam "x" (term.var "x")) (term.lam "x" (term.var "x")))
 
 end LoVe
