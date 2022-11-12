@@ -29,7 +29,7 @@ not strong enough. Start by proving the following generalization (using the
 lemma accurev_eq_reverse_append {α : Type} :
   ∀as xs : list α, accurev as xs = reverse xs ++ as
 | as []        :=
-by simp [accurev, reverse]
+by refl
 | as (x :: xs) :=
 by simp [accurev, reverse, accurev_eq_reverse_append (x :: as) xs]
 
@@ -107,12 +107,12 @@ attribute. -/
 
 @[simp] lemma drop_nil {α : Type} :
   ∀n : ℕ, drop n ([] : list α) = []
-| 0       := by simp [drop]
+| 0       := by refl
 | (_ + 1) := by simp [drop]
 
 @[simp] lemma take_nil {α : Type} :
   ∀n : ℕ, take n ([] : list α) = []
-| 0       := by simp [take]
+| 0       := by refl
 | (_ + 1) := by simp [take]
 
 /-! 2.3. Follow the recursion pattern of `drop` and `take` to prove the
@@ -130,13 +130,13 @@ lemma drop_drop {α : Type} :
 
 lemma take_take {α : Type} :
   ∀(m : ℕ) (xs : list α), take m (take m xs) = take m xs
-| 0       xs        := by simp [take]
+| 0       xs        := by refl
 | m       []        := by simp [take]
 | (m + 1) (x :: xs) := by simp [take, take_take m]
 
 lemma take_drop {α : Type} :
   ∀(n : ℕ) (xs : list α), take n xs ++ drop n xs = xs
-| 0       xs        := by simp [take, drop]
+| 0       xs        := by refl
 | n       []        := by simp [take, drop]
 | (n + 1) (x :: xs) := by simp [take, drop, take_drop n]
 
