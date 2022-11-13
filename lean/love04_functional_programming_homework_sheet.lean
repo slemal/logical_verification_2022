@@ -73,7 +73,17 @@ show accufact 1 n = fact n, by
 /-! 2.2 (2 points). Prove the same property as above again, this time as a
 "paper" proof. Follow the guidelines given in question 1.4 of the exercise. -/
 
--- enter your paper proof here
+/-! We prove a more general result, namely that ∀a n, accufact a n = a * fact n.
+The result then follows by taking a = 1.
+We prove our generalised result by induction on n. The base case comes down to
+proving accufact a 0 = a * fact 0. By definition of accufact, accufact a 0 = a,
+and by definition of fact, fact 0 = 1, hence the result is trivial.
+For the induction step, we have the induction hypothesis
+∀a, accufact a n = a * fact n and we want to prove that
+accufact a (n + 1) = a * fact (n + 1). Using the definition of accufact and
+fact, this equation becomes accufact (a * (n + 1)) n = a * (n + 1) * fact n.
+The result then follows by substituting a * (n + 1) for a in the induction
+hypothesis. -/
 
 
 /-! ## Question 3 (3 points): Gauss's Summation Formula -/
@@ -99,18 +109,18 @@ begin
   induction' m,
   { refl, },
   { simp [sum_upto, ih, mul_add],
-    have foo : (∀n : ℕ, n + 1 = nat.succ n) :=  -- please tell me there is a one line proof instead of this mess
-    begin
-      intro n,
-      refl,
-    end,
-    simp [←foo],
-    simp [mul_add, add_mul, add_assoc],
-    simp [two_mul, add_assoc],
-    simp [←add_assoc],
-    have bar : 2 = 1 + 1 := by refl,
-    simp [bar, ←add_assoc],
-    simp [add_comm] },
+    apply eq.symm,
+    calc  nat.succ m * nat.succ m + nat.succ m
+        = (m + 1) * (m + 1) + (m + 1) :
+      by refl
+    ... = m * m + m * 1 + 1 * m + 1 * 1 + m + 1 :
+      by simp [add_mul, mul_add, add_assoc]
+    ... = m * m + m + m + 1 + m + 1 :
+      by simp [mul_one]
+    ... = m * m + m + 2 * (m + 1) :
+      by simp [add_assoc, two_mul]
+    ... = m * m + m + (2 * m + 2) :
+      by simp [add_assoc, mul_add], },
 end
 
 /-! 3.2 (1 point). Prove the following property of `sum_upto`. -/
