@@ -49,19 +49,19 @@ rules for `∃`, `∧`, and `↔`. -/
 
 lemma exists_and_commute {α : Type} (p q : α → Prop) :
   (∃x, p x ∧ q x) ↔ (∃x, q x ∧ p x) :=
-have exists_and_commute_one_way : (∀p q : α → Prop, (∃x, p x ∧ q x) → (∃x, q x ∧ p x)) :=
+have exists_and_commute_one_way : (∀p q : α → Prop, (∃x, p x ∧ q x) → (∃x, q x ∧ p x)), from
   fix p q,
   assume he,
-  have fee : (∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x)) → (∃x, q x ∧ p x) :=
+  have fee : (∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x)) → (∃x, q x ∧ p x), from
     exists.elim he,
-  have fe : ∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x) :=
+  have fe : ∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x), from
     fix a,
     assume hpq,
-    have hpa : p a :=
+    have hpa : p a, from
       and.elim_left hpq,
-    have hqa : q a :=
+    have hqa : q a, from
       and.elim_right hpq,
-    have hqp : q a ∧ p a :=
+    have hqp : q a ∧ p a, from
       and.intro hqa hpa,
     show ∃x, q x ∧ p x, from
       @exists.intro α (λx, q x ∧ p x) a hqp,
@@ -106,11 +106,11 @@ lemma weak_peirce₃ :
   ∀a b : Prop, ((((a → b) → a) → a) → b) → b :=
 fix a b,
 assume f : ((((a → b) → a) → a) → b),
-have farg : (((a → b) → a) → a) :=
+have farg : (((a → b) → a) → a), from
   assume g : ((a → b) → a),
-  have garg : (a → b) :=
+  have garg : (a → b), from
     assume aa : a,
-    have fbrg : (((a → b) → a) → a) :=
+    have fbrg : (((a → b) → a) → a), from
       assume h : ((a → b) → a),
       show a, from
         aa,

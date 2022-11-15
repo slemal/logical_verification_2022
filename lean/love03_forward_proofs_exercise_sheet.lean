@@ -130,13 +130,13 @@ much of the above proof idea as possible, proceeding mechanically. -/
 
 lemma binomial_square₂ (a b : ℕ) :
   (a + b) * (a + b) = a * a + 2 * a * b + b * b :=
-have h1 : (a + b) * (a + b) = a * (a + b) + b * (a + b) :=
+have h1 : (a + b) * (a + b) = a * (a + b) + b * (a + b), from
   by rw add_mul,
-have h2 : a * (a + b) + b * (a + b) = a * a + a * b + b * a + b * b :=
+have h2 : a * (a + b) + b * (a + b) = a * a + a * b + b * a + b * b, from
   by simp [mul_add, add_assoc],
-have h3 : a * a + a * b + b * a + b * b = a * a + a * b + a * b + b * b :=
+have h3 : a * a + a * b + b * a + b * b = a * a + a * b + a * b + b * b, from
   by simp [mul_comm],
-have h4 : a * a + a * b + a * b + b * b = a * a + 2 * a * b + b * b :=
+have h4 : a * a + a * b + a * b + b * b = a * a + 2 * a * b + b * b, from
   by simp [two_mul, add_mul, add_assoc],
 show _, from
   begin
@@ -169,7 +169,7 @@ axiom forall.one_point_wrong {α : Type} {t : α} {p : α → Prop} :
 lemma proof_of_false :
   false :=
 begin
-  have wi : (∀x, x = true ∧ true) ↔ true :=
+  have wi : (∀x, x = true ∧ true) ↔ true, from
     @forall.one_point_wrong Prop true (λ_, true),
   simp at wi,
   exact wi false,
@@ -184,7 +184,7 @@ axiom exists.one_point_wrong {α : Type} {t : α} {p : α → Prop} :
 lemma proof_of_false₂ :
   false :=
 begin
-  have wi : (∃x : Prop, x = true → false) ↔ false :=
+  have wi : (∃x : Prop, x = true → false) ↔ false, from
     @exists.one_point_wrong Prop true (λ_, false),
   simp at wi,
   exact wi false,

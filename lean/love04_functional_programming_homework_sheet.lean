@@ -59,7 +59,7 @@ yields a too weak induction hypothesis. -/
 lemma accufact_1_eq_fact (n : ℕ) :
   accufact 1 n = fact n :=
 have accufact_a_eq_fact :
-  ∀a n, accufact a n = a * fact n :=
+  ∀a n, accufact a n = a * fact n, from
   begin
     intros a n,
     induction' n,
