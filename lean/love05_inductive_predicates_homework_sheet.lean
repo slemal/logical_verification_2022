@@ -24,12 +24,15 @@ inductive term : Type
 /-! 1.1 (1 point). Define an inductive predicate `is_app` that returns `true` if
 its argument is of the form `term.app …` and that returns false otherwise. -/
 
--- enter your definition here
+inductive is_app : term → Prop
+| app : ∀t u, is_app (term.app t u)
 
 /-! 1.2 (2 points). Define an inductive predicate `is_abs_free` that is true if
 and only if its argument is a λ-term that contains no λ-expressions. -/
 
--- enter your definition here
+inductive is_abs_free : term → Prop
+| app : ∀t u, is_abs_free t → is_abs_free u → is_abs_free (term.app t u)
+| var : ∀s, is_abs_free (term.var s)
 
 
 /-! ## Question 2 (6 points): Even and Odd
@@ -45,18 +48,25 @@ Lean definition below. The definition should distinguish two cases, like `even`,
 and should not rely on `even`. -/
 
 inductive odd : ℕ → Prop
--- supply the missing cases here
+| one             : odd 1
+| add_two {n : ℕ} : odd n → odd (n + 2)
 
 /-! 2.2 (1 point). Give proof terms for the following propositions, based on
 your answer to question 2.1. -/
 
 lemma odd_3 :
   odd 3 :=
-sorry
+begin
+  apply odd.add_two,
+  exact odd.one,
+end
 
 lemma odd_5 :
   odd 5 :=
-sorry
+begin
+  apply odd.add_two,
+  exact odd_3,
+end
 
 /-! 2.3 (2 points). Prove the following lemma by rule induction, as a "paper"
 proof. This is a good exercise to develop a deeper understanding of how rule
@@ -87,7 +97,13 @@ function definition or an introduction rule for an inductive predicate. -/
 
 lemma even_odd {n : ℕ} (heven : even n) :
   odd (n + 1) :=
-sorry
+begin
+  induction' heven,
+  { simp *,
+    exact odd.one, },
+  { apply odd.add_two,
+    exact ih, },
+end
 
 /-! 2.5 (1 point). Prove the following lemma in Lean.
 
@@ -95,6 +111,12 @@ Hint: Recall that `¬ a` is defined as `a → false`. -/
 
 lemma even_not_odd {n : ℕ} (heven : even n) :
   ¬ odd n :=
-sorry
+begin
+  intro hodd,
+  induction' heven,
+  { cases' hodd, },
+  { cases' hodd,
+    exact ih hodd, },
+end
 
 end LoVe
