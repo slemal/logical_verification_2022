@@ -121,33 +121,37 @@ Recall the inductive type of tennis scores from the demo: -/
 of the receiver and that returns false otherwise. -/
 
 inductive srv_ahead : score → Prop
-| (score.vs n m) :=  n > m
-| score.adv_srv  := true
-| score.adv_rcv  := false
-| score.game_srv := true
-| score.game_rcv := false
+| vs       : ∀m n, m > n → srv_ahead (m–n)
+| adv_srv  : srv_ahead score.adv_srv
+| game_srv : srv_ahead score.game_srv
 
 /-! 2.2. Validate your predicate definition by proving the following lemmas. -/
 
 lemma srv_ahead_vs {m n : ℕ} (hgt : m > n) :
   srv_ahead (score.vs m n) :=
-sorry
+by exact srv_ahead.vs m n hgt
 
 lemma srv_ahead_adv_srv :
   srv_ahead score.adv_srv :=
-sorry
+by exact srv_ahead.adv_srv
 
 lemma not_srv_ahead_adv_rcv :
   ¬ srv_ahead score.adv_rcv :=
-sorry
+begin
+  intro h,
+  cases' h,
+end
 
 lemma srv_ahead_game_srv :
   srv_ahead score.game_srv :=
-sorry
+by exact srv_ahead.game_srv
 
 lemma not_srv_ahead_game_rcv :
   ¬ srv_ahead score.game_rcv :=
-sorry
+begin
+  intro h,
+  cases' h,
+end
 
 /-! 2.3. Compare the above lemma statements with your definition. What do you
 observe? -/
