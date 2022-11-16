@@ -45,30 +45,46 @@ def option.orelse {α : Type} : option α → option α → option α
 { emp          := λα, option.none,
   orelse       := @option.orelse,
   emp_orelse   :=
-    sorry,
+    begin
+      intros α a,
+      simp [(<|>)],
+      refl,
+    end,
   orelse_emp   :=
     begin
       intros α a,
       simp [(<|>)],
       cases' a,
-      { refl },
-      { refl }
+      { refl, },
+      { refl, }
     end,
   orelse_assoc :=
-    sorry,
+    begin
+      intros α a b c,
+      simp [(<|>)],
+      cases' a,
+      { refl, },
+      { refl, },
+    end,
   emp_bind     :=
     begin
       intros α β f,
       simp [(>>=)],
-      refl
+      refl,
     end,
   bind_emp     :=
-    sorry,
+    begin
+      intros α β f,
+      simp [(>>=)],
+      cases' f,
+      { refl, },
+      { refl, },
+    end,
   .. option.lawful_monad }
 
 @[simp] lemma option.some_bind {α β : Type} (a : α) (g : α → option β) :
   (option.some a >>= g) = g a :=
-sorry
+by refl
 
 /-! Let us enable some convenient pattern matching syntax, by instantiating
 Lean's `monad_fail` type class. (Do not worry if you do not understand what
@@ -116,16 +132,16 @@ Hints:
   there for inspiration. -/
 
 def faction (σ : Type) (α : Type) : Type :=
-sorry
+σ → option (α × σ)
 
 /-! 1.3. Define the `get` and `set` function for `faction`, where `get` returns
 the state passed along the state monad and `set s` changes the state to `s`. -/
 
-def get {σ : Type} : faction σ σ :=
-sorry
+def get {σ : Type} : faction σ σ
+| s := option.some (s, s)
 
-def set {σ : Type} (s : σ) : faction σ unit :=
-sorry
+def set {σ : Type} (s : σ) : faction σ unit
+| _ := option.some ((), s)
 
 /-! We set up the `>>=` syntax on `faction`: -/
 
@@ -144,8 +160,8 @@ by refl
 /-! 1.4. Define the operator `pure` for `faction`, in such a way that it will
 satisfy the three laws. -/
 
-def faction.pure {σ α : Type} (a : α) : faction σ α :=
-sorry
+def faction.pure {σ α : Type} (a : α) : faction σ α
+| s := option.some (a, s)
 
 /-! We set up the syntax for `pure` on `faction`: -/
 
@@ -173,18 +189,24 @@ Hints:
 @[instance] def faction.lawful_monad {σ : Type} : lawful_monad (faction σ) :=
 { pure_bind  :=
     begin
-    sorry,
+      intros α β a f,
+      funext,
+      refl,
     end,
   bind_pure  :=
     begin
       intros α ma,
-      apply funext,
-      intro s,
+      funext,
       simp [faction.bind_apply, faction.pure_apply],
-      apply lawful_monad.bind_pure
+      apply lawful_monad.bind_pure,
     end,
   bind_assoc :=
-    sorry,
+    begin
+      intros α β γ f g ma,
+      funext,
+      simp [faction.bind_apply],
+      apply lawful_monad.bind_assoc,
+    end,
   ..faction.has_bind,
   ..faction.has_pure }
 
@@ -206,18 +228,30 @@ infixr ` >=> ` : 90 := kleisli
 lemma pure_kleisli {m : Type → Type} [lawful_monad m] {α β : Type}
     (f : α → m β) :
   (pure >=> f) = f :=
-sorry
+begin
+  funext,
+  simp [(>=>)],
+  apply lawful_monad.pure_bind,
+end
 
 lemma kleisli_pure {m : Type → Type} [lawful_monad m] {α β : Type}
     (f : α → m β) :
   (f >=> pure) = f :=
-sorry
+begin
+  funext,
+  simp [(>=>)],
+  apply lawful_monad.bind_pure,
+end
 
 /-! 2.2. Prove that the Kleisli operator is associative. -/
 
 lemma kleisli_assoc {m : Type → Type} [lawful_monad m] {α β γ δ : Type}
     (f : α → m β) (g : β → m γ) (h : γ → m δ) :
   ((f >=> g) >=> h) = (f >=> (g >=> h)) :=
-sorry
+begin
+  funext,
+  simp [(>=>)],
+  apply lawful_monad.bind_assoc,
+end
 
 end LoVe
