@@ -91,7 +91,15 @@ need not be justified if you think they are obvious (to humans), but you should
 say which key lemmas they depend on. You should be explicit whenever you use a
 function definition or an introduction rule for an inductive predicate. -/
 
--- enter your paper proof here
+/-! We prove that for any n, if n is even then n + 1 is odd. We proceed by
+induction on the length of the derivation that n is even. If it has length 0,
+then the only rule applied is even.zero, and we need to show odd (0 + 1).
+But this is just odd 1, which is obtained by applying rule odd.one.
+If the last rule applied was even.add_two, then there is some m such that
+n = m + 2 and m is even. We want to prove that odd (n + 1), that is, odd (m + 3).
+The derivation of even m is one step shorter than that of even n, hence we may
+apply the induction hypothesis to get odd (m + 1). Applying rule odd.add_two,
+we get odd (m + 3), which is what we wanted. -/
 
 /-! 2.4 (1 point). Prove the same lemma again, but this time in Lean: -/
 
