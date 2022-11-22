@@ -179,7 +179,15 @@ lemma mmap_mmap {m : Type → Type} [comm_lawful_monad m]
 begin
   induction' as with hd tl,
   { simp [mmap, lawful_monad.pure_bind], },
-  { sorry, },
+  { simp [mmap],
+    simp [lawful_monad.bind_assoc],
+    simp [lawful_monad.pure_bind],
+    simp [mmap],
+    simp [←ih],
+    simp [lawful_monad.bind_assoc],
+    exact comm_lawful_monad.bind_comm (f hd) (λ(a : β), mmap f tl) g
+      (λ(a : β) (b : list β) (c : γ),
+        mmap g b >>= λ(cs : list γ), pure (c :: cs)), },
 end
 
 end LoVe
