@@ -107,7 +107,12 @@ at indexes `i` and `j` in the input list `as`. If either index is out of range,
 return `as` unchanged. -/
 
 def list.swap {α : Type} (as : list α) (i j : ℕ) : error string (list α) :=
-sorry
+do {
+  a ← list.nth_error as i,
+  b ← list.nth_error as j,
+  pure (list.update_nth (list.update_nth as j a) i b) }
+.catch (λe,
+  pure as)
 
 #reduce list.swap [3, 1, 4, 1] 0 2   -- expected: error.good [4, 1, 3, 1]
 #reduce list.swap [3, 1, 4, 1] 0 7   -- expected: error.good [3, 1, 4, 1]
