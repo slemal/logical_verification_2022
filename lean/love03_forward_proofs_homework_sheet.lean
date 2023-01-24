@@ -52,9 +52,9 @@ lemma exists_and_commute {α : Type} (p q : α → Prop) :
 have exists_and_commute_one_way : (∀p q : α → Prop, (∃x, p x ∧ q x) → (∃x, q x ∧ p x)), from
   fix p q,
   assume he,
-  have fee : (∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x)) → (∃x, q x ∧ p x), from
+  have fee : (∀(a : α), p a ∧ q a → (∃x, q x ∧ p x)) → (∃x, q x ∧ p x), from
     exists.elim he,
-  have fe : ∀ (a : α), p a ∧ q a → (∃x, q x ∧ p x), from
+  have fe : ∀(a : α), p a ∧ q a → (∃x, q x ∧ p x), from
     fix a,
     assume hpq,
     have hpa : p a, from

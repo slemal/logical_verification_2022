@@ -87,8 +87,11 @@ def simplify : aexp → aexp
 | (aexp.add e₁ (aexp.num 0)) := simplify e₁
 | (aexp.sub (aexp.num 0) e₂) := simplify e₂
 | (aexp.sub e₁ (aexp.num 0)) := simplify e₁
+| (aexp.mul (aexp.num 0) e₂) := aexp.num 0
+| (aexp.mul e₁ (aexp.num 0)) := aexp.num 0
 | (aexp.mul (aexp.num 1) e₂) := simplify e₂
 | (aexp.mul e₁ (aexp.num 1)) := simplify e₁
+| (aexp.div (aexp.num 0) e₂) := aexp.num 0
 | (aexp.div (aexp.num 1) e₂) := simplify e₂
 | (aexp.div e₁ (aexp.num 1)) := simplify e₁
 | (aexp.num i)               := aexp.num i
@@ -127,20 +130,20 @@ def I : α → α :=
 
 def K : α → β → α :=
 λa b, a
-
+ 
 def C : (α → β → γ) → β → α → γ :=
-λ f b a, f a b
+λf b a, f a b
 
 def proj_1st : α → α → α :=
-λ a _, a
+λa _, a
 
 /-! Please give a different answer than for `proj_1st`. -/
 
 def proj_2nd : α → α → α :=
-λ _ b, b
+λ_ b, b
 
 def some_nonsense : (α → β → γ) → α → (α → γ) → β → γ :=
-λ f a g b, g a
+λf a g b, g a
 
 /-! 3.2. Show the typing derivation for your definition of `C` above, on paper
 or using ASCII or Unicode art. You might find the characters `–` (to draw

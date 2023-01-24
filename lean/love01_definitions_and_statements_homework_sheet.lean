@@ -100,16 +100,16 @@ while constructing a term. By hovering over `_`, you will see the current
 logical context. -/
 
 def B : (α → β) → (γ → α) → γ → β :=
-λ f g c, f (g c)
+λf g c, f (g c)
 
 def S : (α → β → γ) → (α → β) → α → γ :=
-λ f g a, f a (g a)
+λf g a, f a (g a)
 
 def more_nonsense : (γ → (α → β) → α) → γ → β → α :=
-λ f c b, f c (λ a, b)
+λf c b, f c (λa, b)
 
 def even_more_nonsense : (α → α → β) → (β → γ) → α → β → γ :=
-λ f g a b, g b
+λf g a b, g b
 
 /-! 3.2 (1 point). Complete the following definition.
 
@@ -119,7 +119,7 @@ follow the procedure described in the Hitchhiker's Guide.
 Note: Peirce is pronounced like the English word "purse". -/
 
 def weak_peirce : ((((α → β) → α) → α) → β) → β :=
-λ f, f (λ g, g (λ a, f (λ h, a)))
+λf, f (λg, g (λa, f (λh, a)))
 
 /-! 3.3 (2 points). Show the typing derivation for your definition of `S` above,
 using ASCII or Unicode art. You might find the characters `–` (to draw
@@ -137,11 +137,11 @@ Let Γ be the context f : α → β → γ, g : α → β, a = α.
             -----------------------------------------------App
                             Γ ⊢ f a (g a) : γ 
             -------------------------------------------------Lam
-            f : α → β → γ, g : α → β ⊢ λ a, f a (g a) : α → γ
+            f : α → β → γ, g : α → β ⊢ λa, f a (g a) : α → γ
             --------------------------------------------------Lam
-            f : α → β → γ ⊢ λ g a, f a (g a) : (α → β) → α → γ
+            f : α → β → γ ⊢ λg a, f a (g a) : (α → β) → α → γ
             ----------------------------------------------------Lam
-            ⊢ λ f g a, f a (g a) : (α → β → γ) → (α → β) → α → γ
+            ⊢ λf g a, f a (g a) : (α → β → γ) → (α → β) → α → γ
 -/
 
 end LoVe
