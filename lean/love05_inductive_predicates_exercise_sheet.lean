@@ -78,7 +78,7 @@ begin
   case add_two : k hek ih {
     cases' ih with m heq,
     apply exists.intro (m + 1),
-    simp [mul_add, heq], },
+    simp [mul_add, heq], }
 end
 
 /-! 1.5. Using `even_two_times` and `even_imp_exists_two_times`, prove the
@@ -90,8 +90,8 @@ begin
   apply iff.intro,
   { exact even_imp_exists_two_times n, },
   { intro hex,
-  cases' hex with m heq,
-  simp [heq, even_two_times m], },
+    cases' hex with m heq,
+    simp [heq, even_two_times m], }
 end
 
 /-! 1.6 (**optional**). Give a structurally recursive definition of `even` and
@@ -172,7 +172,7 @@ lemma mirror_is_full {α : Type} :
 begin
   intros t hfm,
   have hfmm : is_full (mirror (mirror t)), from
-    is_full_mirror (mirror t) hfm,
+    is_full_mirror _ hfm,
     simp [mirror_mirror] at hfmm,
     exact hfmm,
 end
@@ -191,7 +191,7 @@ begin
   intro t,
   cases' t,
   { simp [map_btree], },
-  { simp [map_btree], },
+  { simp [map_btree], }
 end
 
 /-! 3.4 (**optional**). Prove the following lemma by rule induction. -/
@@ -206,12 +206,11 @@ begin
     exact is_full.empty, },
   { simp [map_btree],
     intro hf,
-    cases' hf with a l r hfl hfr hfa,
+    cases' hf with a l r hfl hfr hiff,
     apply is_full.node,
-    { exact ihl f hfl, },
-    { exact ihr f hfr, },
-    { simp [map_btree_eq_empty_iff],
-      exact hfa, }, },
+    { exact ihl _ hfl, },
+    { exact ihr _ hfr, },
+    { simp [map_btree_eq_empty_iff, hiff], } }
 end
 
 lemma map_btree_mirror {α β : Type} (f : α → β) :
@@ -223,7 +222,7 @@ begin
   { simp [mirror, map_btree],
     apply and.intro,
     { exact ihr f, },
-    { exact ihl f, }, },
+    { exact ihl f, } }
 end
 
 end LoVe

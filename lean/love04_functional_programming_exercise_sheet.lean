@@ -37,7 +37,7 @@ by simp [accurev, reverse, accurev_eq_reverse_append (x :: as) xs]
 
 lemma accurev_eq_reverse {α : Type} (xs : list α) :
   accurev [] xs = reverse xs :=
-by simp [accurev_eq_reverse_append [] xs]
+by simp [accurev_eq_reverse_append]
 
 /-! 1.3. Prove the following property.
 
@@ -108,12 +108,12 @@ attribute. -/
 @[simp] lemma drop_nil {α : Type} :
   ∀n : ℕ, drop n ([] : list α) = []
 | 0       := by refl
-| (_ + 1) := by simp [drop]
+| (_ + 1) := by refl
 
 @[simp] lemma take_nil {α : Type} :
   ∀n : ℕ, take n ([] : list α) = []
 | 0       := by refl
-| (_ + 1) := by simp [take]
+| (_ + 1) := by refl
 
 /-! 2.3. Follow the recursion pattern of `drop` and `take` to prove the
 following lemmas. In other words, for each lemma, there should be three cases,
@@ -126,19 +126,19 @@ lemma drop_drop {α : Type} :
   ∀(m n : ℕ) (xs : list α), drop n (drop m xs) = drop (n + m) xs
 | 0       n xs        := by refl
 | m       n []        := by simp
-| (m + 1) n (x :: xs) := by simp [drop, ←add_assoc, drop_drop m n]
+| (m + 1) n (x :: xs) := by simp [drop, ←add_assoc, drop_drop]
 
 lemma take_take {α : Type} :
   ∀(m : ℕ) (xs : list α), take m (take m xs) = take m xs
 | 0       xs        := by refl
-| m       []        := by simp [take]
-| (m + 1) (x :: xs) := by simp [take, take_take m]
+| m       []        := by simp
+| (m + 1) (x :: xs) := by simp [take, take_take]
 
 lemma take_drop {α : Type} :
   ∀(n : ℕ) (xs : list α), take n xs ++ drop n xs = xs
 | 0       xs        := by refl
-| n       []        := by simp [take, drop]
-| (n + 1) (x :: xs) := by simp [take, drop, take_drop n]
+| n       []        := by simp
+| (n + 1) (x :: xs) := by simp [take, drop, take_drop]
 
 
 /-! ## Question 3: A Type of λ-Terms

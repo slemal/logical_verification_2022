@@ -94,7 +94,7 @@ begin
     apply false.elim,
     exact hna ha, },
   { intro hb,
-  exact hb, },
+  exact hb, }
 end
 
 /-! 2.2 (2 points). Prove the missing link in our chain of classical axiom

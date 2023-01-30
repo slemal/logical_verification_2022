@@ -16,6 +16,7 @@ namespace LoVe
 
 lemma I (a : Prop) :
   a → a :=
+
 assume ha,
 show a, from
   ha
@@ -67,17 +68,17 @@ lemma forall_and {α : Type} (p q : α → Prop) :
 iff.intro
   (assume hfa,
    and.intro
-   (fix x,
-    show p x, from
-      and.elim_left (hfa x))
-   (fix x,
-    show q x, from
-      and.elim_right (hfa x)))
+     (fix x,
+      show p x, from
+        and.elim_left (hfa x))
+     (fix x,
+      show q x, from
+        and.elim_right (hfa x)))
   (assume hand,
    fix x,
    and.intro
-   (and.elim_left hand x)
-   (and.elim_right hand x))
+     (and.elim_left hand x)
+     (and.elim_right hand x))
 
 /-! 1.4 (**optional**). Reuse, if possible, the lemma `forall_and` from question
 1.3 to prove the following instance of the lemma. -/

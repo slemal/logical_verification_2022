@@ -69,7 +69,7 @@ lemma error.bind_pure {ε α : Type} (ma : error ε α) :
 begin
   cases' ma,
   { refl, },
-  { refl, },
+  { refl, }
 end
 
 lemma error.bind_assoc {ε α β γ : Type} (f : α → error ε β) (g : β → error ε γ)
@@ -78,7 +78,7 @@ lemma error.bind_assoc {ε α β γ : Type} (f : α → error ε β) (g : β →
 begin
   cases' ma,
   { refl, },
-  { refl, },
+  { refl, }
 end
 
 /-! 1.4 (1 point). Define the following two operations on the error monad.
@@ -136,7 +136,7 @@ begin
   induction' as with hd tl,
   { refl, },
   { simp [mmap, ih],
-    simp [lawful_monad.pure_bind], },
+    simp [lawful_monad.pure_bind], }
 end
 
 /-! Commutative monads are monads for which we can reorder actions that do not
@@ -163,8 +163,8 @@ begin
     { simp [option.bind],
       cases g a,
       { refl, },
-      { refl, }, },
-    { simp [option.bind], }, },
+      { refl, } },
+    { simp [option.bind], } }
 end
 
 /-! 2.3 (1 point). Explain why `error` is not a commutative monad. -/
@@ -192,7 +192,7 @@ begin
     simp [lawful_monad.bind_assoc],
     exact comm_lawful_monad.bind_comm (f hd) (λ(a : β), mmap f tl) g
       (λ(a : β) (b : list β) (c : γ),
-        mmap g b >>= λ(cs : list γ), pure (c :: cs)), },
+        mmap g b >>= λ(cs : list γ), pure (c :: cs)), }
 end
 
 end LoVe

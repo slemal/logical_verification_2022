@@ -64,7 +64,7 @@ def option.orelse {α : Type} : option α → option α → option α
       simp [(<|>)],
       cases' a,
       { refl, },
-      { refl, },
+      { refl, }
     end,
   emp_bind     :=
     begin
@@ -78,7 +78,7 @@ def option.orelse {α : Type} : option α → option α → option α
       simp [(>>=)],
       cases' f,
       { refl, },
-      { refl, },
+      { refl, }
     end,
   .. option.lawful_monad }
 
@@ -138,10 +138,10 @@ def faction (σ : Type) (α : Type) : Type :=
 the state passed along the state monad and `set s` changes the state to `s`. -/
 
 def get {σ : Type} : faction σ σ
-| s := option.some (s, s)
+| s := pure (s, s)
 
 def set {σ : Type} (s : σ) : faction σ unit
-| _ := option.some ((), s)
+| _ := pure ((), s)
 
 /-! We set up the `>>=` syntax on `faction`: -/
 
@@ -161,7 +161,7 @@ by refl
 satisfy the three laws. -/
 
 def faction.pure {σ α : Type} (a : α) : faction σ α
-| s := option.some (a, s)
+| s := pure (a, s)
 
 /-! We set up the syntax for `pure` on `faction`: -/
 
@@ -172,7 +172,7 @@ lemma faction.pure_apply {σ α : Type} (a : α) (s : σ) :
   (pure a : faction σ α) s = option.some (a, s) :=
 by refl
 
-/-! 1.3. Register `faction` as a monad.
+/-! 1.5. Register `faction` as a monad.
 
 Warning: The last goal is difficult.
 
@@ -204,7 +204,6 @@ Hints:
     begin
       intros α β γ f g ma,
       funext,
-      simp [faction.bind_apply],
       apply lawful_monad.bind_assoc,
     end,
   ..faction.has_bind,
@@ -230,7 +229,6 @@ lemma pure_kleisli {m : Type → Type} [lawful_monad m] {α β : Type}
   (pure >=> f) = f :=
 begin
   funext,
-  simp [(>=>)],
   apply lawful_monad.pure_bind,
 end
 
@@ -239,7 +237,6 @@ lemma kleisli_pure {m : Type → Type} [lawful_monad m] {α β : Type}
   (f >=> pure) = f :=
 begin
   funext,
-  simp [(>=>)],
   apply lawful_monad.bind_pure,
 end
 
@@ -250,7 +247,6 @@ lemma kleisli_assoc {m : Type → Type} [lawful_monad m] {α β γ δ : Type}
   ((f >=> g) >=> h) = (f >=> (g >=> h)) :=
 begin
   funext,
-  simp [(>=>)],
   apply lawful_monad.bind_assoc,
 end
 

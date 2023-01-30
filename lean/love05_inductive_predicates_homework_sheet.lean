@@ -110,7 +110,7 @@ begin
   { simp *,
     exact odd.one, },
   { apply odd.add_two,
-    exact ih, },
+    exact ih, }
 end
 
 /-! 2.5 (1 point). Prove the following lemma in Lean.
@@ -124,7 +124,7 @@ begin
   induction' heven,
   { cases' hodd, },
   { cases' hodd,
-    exact ih hodd, },
+    exact ih hodd, }
 end
 
 end LoVe

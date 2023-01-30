@@ -30,7 +30,7 @@ begin
   intro t,
   induction' t,
   { refl, },
-  { simp [map_btree, ih_t, ih_t_1], },
+  { simp [map_btree, ih_t, ih_t_1], }
 end
 
 
@@ -65,7 +65,7 @@ have accufact_a_eq_fact :
     induction' n,
     { simp [accufact, fact], },
     { simp [accufact, fact, ih],
-      simp [←mul_assoc, mul_comm], },
+      simp [←mul_assoc, mul_comm], }
   end,
 show accufact 1 n = fact n, by
   simp [accufact_a_eq_fact 1 n]
@@ -120,7 +120,7 @@ begin
     ... = m * m + m + 2 * (m + 1) :
       by simp [add_assoc, two_mul]
     ... = m * m + m + (2 * m + 2) :
-      by simp [add_assoc, mul_add], },
+      by simp [add_assoc, mul_add], }
 end
 
 /-! 3.2 (1 point). Prove the following property of `sum_upto`. -/
@@ -134,7 +134,7 @@ begin
   { simp [sum_upto, ih],
     simp [add_assoc],
     simp [←add_assoc],
-    simp [add_comm], },
+    simp [add_comm], }
 end
 
 end LoVe

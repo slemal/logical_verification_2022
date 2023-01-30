@@ -45,7 +45,7 @@ end
 lemma proj_1st (a : Prop) :
   a → a → a :=
 begin
-  intros ha hb,
+  intros ha _,
   exact ha,
 end
 
@@ -54,7 +54,7 @@ end
 lemma proj_2nd (a : Prop) :
   a → a → a :=
 begin
-  intros ha hb,
+  intros _ hb,
   exact hb,
 end
 
@@ -91,10 +91,10 @@ begin
     apply and.intro,
     { intro x,
       apply and.elim_left,
-      exact hfa x, },
+      apply hfa, },
     { intro x,
       apply and.elim_right,
-      exact hfa x, } },
+      apply hfa, } },
   { intros hdis x,
     apply and.intro,
     { apply and.elim_left hdis, },
@@ -114,7 +114,7 @@ lemma mul_zero (n : ℕ) :
 begin
   induction' n,
   { refl, },
-  { simp [mul, add, ih], },
+  { simp [mul, add, ih], }
 end
 
 lemma mul_succ (m n : ℕ) :
@@ -122,7 +122,7 @@ lemma mul_succ (m n : ℕ) :
 begin
   induction' n,
   { refl, },
-  { simp [mul, add, ih, add_succ, add_assoc], },
+  { simp [mul, add, ih, add_succ, add_assoc], }
 end
 
 /-! 2.2. Prove commutativity and associativity of multiplication using the
@@ -133,7 +133,7 @@ lemma mul_comm (m n : ℕ) :
 begin
   induction' n,
   { simp [mul, mul_zero], },
-  { simp [mul, mul_succ, ih, add_comm], },
+  { simp [mul, mul_succ, ih, add_comm], }
 end
 
 lemma mul_assoc (l m n : ℕ) :
@@ -141,7 +141,7 @@ lemma mul_assoc (l m n : ℕ) :
 begin
   induction' n,
   { simp [mul], },
-  { simp [mul, ih, mul_add], },
+  { simp [mul, ih, mul_add], }
 end
 
 /-! 2.3. Prove the symmetric variant of `mul_add` using `rw`. To apply
@@ -196,7 +196,7 @@ begin
     apply haba,
     intro ha,
     apply false.elim,
-    exact hna ha, },
+    exact hna ha, }
 end
 
 /-! 3.2 (**optional**). Prove the following implication using tactics. -/
@@ -206,8 +206,7 @@ lemma dn_of_peirce :
 begin
   rw peirce,
   rw double_negation,
-  intros hp a,
-  intro hnna,
+  intros hp a hnna,
   apply hp a false,
   intro hna,
   apply false.elim,
