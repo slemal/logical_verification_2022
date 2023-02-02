@@ -28,7 +28,25 @@ types that belong to the `has_repr` type class. -/
 
 meta def expr.repr : expr → string
 | (expr.var n)                := "(var " ++ repr n ++ ")"
--- enter the missing cases here
+| (expr.sort _)               := "(sort)"
+| (expr.const a _)            := "(const " ++ a.to_string ++ ")"
+| (expr.mvar a b e)           :=
+    "(mvar " ++ a.to_string ++ " " ++ b.to_string
+    ++ " " ++ e.repr ++ ")"
+| (expr.local_const a b bi e) :=
+    "(local_const " ++ a.to_string ++ " " ++ b.to_string ++ " "
+    ++ repr bi ++ " " ++ e.repr ++ ")"
+| (expr.app e₁ e₂)            :=
+    "(app " ++ e₁.repr ++ " " ++ e₂.repr ++ ")"
+| (expr.lam a _ e₁ e₂)        :=
+    "(lam " ++ a.to_string ++ " "
+      ++ e₁.repr ++ " " ++ e₂.repr ++ ")"
+| (expr.pi a _ e₁ e₂)         :=
+    "(pi " ++ a.to_string ++ " " ++ e₁.repr ++ " " ++ e₂.repr ++ ")"
+| (expr.elet a e₁ e₂ e₃)      :=
+    "(elet " ++ a.to_string ++ " "
+    ++ e₁.repr ++ " " ++ e₂.repr ++ " " ++ e₃.repr ++ ")"
+| (expr.macro _ _)          := "(macro)"
 
 /-! We register `expr.repr` in the `has_repr` type class, so that we can use
 `repr` without qualification in the future, and so that it is available to
@@ -69,7 +87,7 @@ quoting). -/
 #check tactic.applyc
 
 meta def intro_ands : tactic unit :=
-sorry
+do tactic.repeat (tactic.applyc ``and.intro)
 
 lemma abcd_bd (a b c d : Prop) (h : a ∧ (b ∧ c) ∧ d) :
   b ∧ d :=
@@ -137,7 +155,11 @@ form. Make sure to handle this failure gracefully, for example using
 `tactic.try` or `<|> pure ()`. -/
 
 meta def destruct_ands : tactic unit :=
-sorry
+tactic.repeat (do
+  hs ← tactic.local_context,
+  h ← list.mfirst (λh, do `(_ ∧ _) ← tactic.infer_type h, pure h) hs,
+  tactic.cases h,
+  pure ())
 
 lemma abcd_bd₂ (a b c d : Prop) (h : a ∧ (b ∧ c) ∧ d) :
   b ∧ d :=
@@ -158,7 +180,11 @@ end
 implement the desired `destro_and` tactic. -/
 
 meta def destro_and : tactic unit :=
-sorry
+do
+  destruct_ands,
+  intro_ands,
+  tactic.all_goals (tactic.try tactic.assumption),
+  pure ()
 
 lemma abcd_bd₃ (a b c d : Prop) (h : a ∧ (b ∧ c) ∧ d) :
   b ∧ d :=
@@ -214,7 +240,7 @@ Booleans, and `expr.is_constant_of` to check whether an expression is a
 constant. -/
 
 meta def term_contains (e : expr) (nam : name) : bool :=
-sorry
+expr.fold e ff (λe' _ b, b || (expr.is_constant_of e' nam) )
 
 /-! 3.2 (**optional**). Write a metafunction that checks whether an expression
 contains **all** constants in a list.
@@ -222,7 +248,7 @@ contains **all** constants in a list.
 You can use `list.band` (Boolean and). -/
 
 meta def term_contains_all (nams : list name) (e : expr) : bool :=
-sorry
+list.band (list.map (term_contains e) nams)
 
 /-! 3.3 (**optional**). Produce the list of all theorems that contain all
 constants `nams` in their statement.
@@ -232,7 +258,8 @@ constants `nams` in their statement.
 `declaration.to_name` you get the name. -/
 
 meta def list_constants (nams : list name) (e : environment) : list name :=
-sorry
+environment.fold e [] (λdecl namss,
+  if term_contains_all nams decl.type then decl.to_name :: namss else namss)
 
 /-! Finally, we develop a tactic that uses the above metafunctions to log all
 found theorems: -/

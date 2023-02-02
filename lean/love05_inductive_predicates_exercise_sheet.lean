@@ -100,7 +100,7 @@ test it with `#eval`.
 Hint: The negation operator on `bool` is called `not`. -/
 
 def even_rec : nat → bool
-| 0       := true
+| 0       := tt
 | (n + 1) := not (even_rec n)
 
 #eval even_rec 0
