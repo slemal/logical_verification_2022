@@ -33,7 +33,12 @@ different symbols. -/
 #check tactic.intro1
 
 meta def mindless_safe : tactic unit :=
-sorry
+do
+  tactic.repeat (tactic.applyc ``true.intro
+             <|> tactic.applyc ``and.intro
+             <|> tactic.applyc ``iff.intro
+             <|> (do tactic.intro1, pure ())
+             <|> tactic.assumption)
 
 lemma abcd (a b c d : Prop) (hc : c) :
   a → ¬ b ∧ (c ↔ d) :=
@@ -70,7 +75,9 @@ Once a hypothesis has been found for which steps 1 to 3 succeed,
 `mindless_unsafe` succeeds. -/
 
 meta def mindless_unsafe (continue : tactic unit) : tactic unit :=
-sorry
+do
+  hs ← tactic.local_context,
+  hs.mfirst (λh, do tactic.apply h, continue, tactic.done)
 
 /-! A few tests follow. -/
 
