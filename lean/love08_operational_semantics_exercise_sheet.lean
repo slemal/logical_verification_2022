@@ -119,8 +119,8 @@ lemma big_step_loop {S s u} :
 begin
   apply iff.intro; intro h,
   { cases' h,
-    { apply or.intro_left; refl, },
-    { apply or.intro_right,
+    { apply or.inl; refl, },
+    { apply or.inr,
       apply exists.intro,
       apply and.intro; assumption, } },
   { cases' h,

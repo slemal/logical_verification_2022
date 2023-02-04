@@ -53,7 +53,7 @@ inductive big_step : stmt × state → state → Prop
   big_step (S ;; T, s) u
 | unless_true {b : state → Prop} {S s} (hcond : b s) :
   big_step (stmt.unless b S, s) s
-| unless_false {b : state → Prop} {S s t} (hcond : b s)
+| unless_false {b : state → Prop} {S s t} (hcond : ¬ b s)
     (hS : big_step (S, s) t) :
   big_step (stmt.unless b S, s) t
 | repeat_zero {S s} :
@@ -149,7 +149,11 @@ transition. If necessary, revise your answer to question 1.3. -/
 
 lemma small_step_mess_decreases {Ss Tt : stmt × state} (h : Ss ⇒ Tt) :
   mess (prod.fst Ss) > mess (prod.fst Tt) :=
-sorry
+begin
+  induction' h; simp [mess],
+  { exact ih, },
+  { linarith, }
+end
 
 /-! 1.6 (1 bonus point). Prove that the inverse of the `⇒` relation is well
 founded. The inverse is simply `λTt Ss, Ss ⇒ Tt`. A relation `≺` is well founded
@@ -168,8 +172,11 @@ well founded. -/
 
 lemma small_step_wf :
   well_founded (λTt Ss, Ss ⇒ Tt) :=
-sorry
-
+begin
+  apply subrelation.wf _ (measure_wf (mess ∘ prod.fst)),
+  intros x y h,
+  exact small_step_mess_decreases h,
+end
 
 /-! ## Question 2 (3 points): Inversion Rules
 
@@ -178,7 +185,18 @@ of `unless`. -/
 
 lemma big_step_ite_iff {b S s t} :
   (stmt.unless b S, s) ⟹ t ↔ (b s ∧ s = t) ∨ (¬ b s ∧ (S, s) ⟹ t) :=
-sorry
+begin
+  apply iff.intro; intro h,
+  { cases' h,
+    { apply or.inl; apply and.intro,
+      { exact hcond, },
+      { refl, } },
+    { apply or.inr; apply and.intro; assumption, } },
+  { cases' h; cases' h,
+    { rw ←right,
+      exact big_step.unless_true left, },
+    { apply big_step.unless_false; assumption, } }
+end
 
 /-! 2.2 (2 points). Prove the following inversion rule for the big-step
 semantics of `repeat`. -/
@@ -187,6 +205,20 @@ lemma big_step_repeat_iff {n S s u} :
   (stmt.repeat n S, s) ⟹ u ↔
   (n = 0 ∧ u = s)
   ∨ (∃m t, n = m + 1 ∧ (S, s) ⟹ t ∧ (stmt.repeat m S, t) ⟹ u) :=
-sorry
+begin
+  apply iff.intro; intro h,
+  { cases' h,
+    { apply or.inl; apply and.intro; refl, },
+    { apply or.inr,
+      apply exists.intro n,
+      apply exists.intro t,
+      repeat {apply and.intro }; simp [*], } },
+  { repeat { cases' h },
+    { rw left; rw right,
+      exact big_step.repeat_zero, },
+    { cases' right,
+      rw left,
+      apply big_step.repeat_succ; assumption, } }
+end
 
 end LoVe
