@@ -45,7 +45,23 @@ semantics: -/
 inductive big_step : stmt × state → state → Prop
 | skip {s} :
   big_step (stmt.skip, s) s
--- enter the missing cases here
+| assign {x a s} :
+  big_step (stmt.assign x a, s) (s{x ↦ a s})
+| seq {S T s t u}
+    (hS : big_step (S, s) t)
+    (hT : big_step (T, t) u) :
+  big_step (S ;; T, s) u
+| unless_true {b : state → Prop} {S s} (hcond : b s) :
+  big_step (stmt.unless b S, s) s
+| unless_false {b : state → Prop} {S s t} (hcond : b s)
+    (hS : big_step (S, s) t) :
+  big_step (stmt.unless b S, s) t
+| repeat_zero {S s} :
+  big_step (stmt.repeat 0 S, s) s
+| repeat_succ {S s t u n}
+    (hbody : big_step (S, s) t)
+    (hrest : big_step (stmt.repeat n S, t) u) :
+  big_step (stmt.repeat (n + 1) S, s) u
 
 infix ` ⟹ ` : 110 := big_step
 
@@ -55,7 +71,18 @@ semantics: -/
 inductive small_step : stmt × state → stmt × state → Prop
 | assign {x a s} :
   small_step (stmt.assign x a, s) (stmt.skip, s{x ↦ a s})
--- enter the missing cases here
+| seq_step {S S' T s s'} (hS : small_step (S, s) (S', s')) :
+  small_step (S ;; T, s) (S' ;; T, s')
+| seq_skip {T s} :
+  small_step (stmt.skip ;; T, s) (T, s)
+| unless_true {b : state → Prop} {S s} (hcond : b s) :
+  small_step (stmt.unless b S, s) (stmt.skip, s)
+| unless_false {b : state → Prop} {S s} (hcond : ¬ b s) :
+  small_step (stmt.unless b S, s) (S, s)
+| repeat_zero {S s} :
+  small_step (stmt.repeat 0 S, s) (stmt.skip, s)
+| repeat_succ {S s n} :
+  small_step (stmt.repeat (n + 1) S, s) (S ;; stmt.repeat n S, s)
 
 infixr ` ⇒ ` := small_step
 infixr ` ⇒* ` : 100 := star small_step
@@ -73,7 +100,10 @@ decreases with each small-step transition. -/
 
 def mess : stmt → ℕ
 | stmt.skip         := 0
--- enter the missing cases here
+| (stmt.assign x a) := 1
+| (stmt.seq S T)    := mess S + mess T + 1
+| (stmt.unless b S) := mess S + 1
+| (stmt.repeat n S) := n * (mess S + 2) + 1
 
 /-! 1.4 (1 point). Consider the following program `S₀`: -/
 
@@ -87,7 +117,32 @@ stmt.repeat 1 (incr "m" ;; incr "n")
 evaluation, by giving `S₀`, `S₁`, `S₂`, …, as well as the corresponding values
 of `mess` (which you can obtain using `#eval`). -/
 
--- enter your answer here
+
+def S₁ : stmt :=
+(incr "m" ;; incr "n") ;; stmt.repeat 0 (incr "m" ;; incr "n")
+
+def S₂ : stmt :=
+(stmt.skip ;; incr "n") ;; stmt.repeat 0 (incr "m" ;; incr "n")
+
+def S₃ : stmt :=
+incr "n" ;; stmt.repeat 0 (incr "m" ;; incr "n")
+
+def S₄ : stmt :=
+stmt.skip ;; stmt.repeat 0 (incr "m" ;; incr "n")
+
+def S₅ : stmt :=
+stmt.repeat 0 (incr "m" ;; incr "n")
+
+def S₆ : stmt :=
+stmt.skip
+
+#eval mess S₀   -- result: 6
+#eval mess S₁   -- result: 5
+#eval mess S₂   -- result: 4
+#eval mess S₃   -- result: 3
+#eval mess S₄   -- result: 2
+#eval mess S₅   -- result: 1
+#eval mess S₆   -- result: 0
 
 /-! 1.5 (1 point). Prove that the measure decreases with each small-step
 transition. If necessary, revise your answer to question 1.3. -/
