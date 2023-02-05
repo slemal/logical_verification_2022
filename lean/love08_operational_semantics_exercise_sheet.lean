@@ -119,12 +119,12 @@ lemma big_step_loop {S s u} :
 begin
   apply iff.intro; intro h,
   { cases' h,
-    { apply or.inl; refl, },
+    { apply or.inl, refl, },
     { apply or.inr,
       apply exists.intro,
       apply and.intro; assumption, } },
   { cases' h,
-    { rw h; exact big_step.no_loop, },
+    { rw h, exact big_step.no_loop, },
     { cases' h with t,
       cases' h,
       apply big_step.loop; assumption, } }
@@ -142,7 +142,7 @@ begin
     exact h, },
   { cases' h with i,
     cases' h with hless,
-    apply big_step.choice; assumption, }
+    apply big_step.choice, assumption, }
 end
 
 end gcl
@@ -156,11 +156,11 @@ def gcl_of : stmt → gcl.stmt state
 | (S ;; T)          := (gcl_of S ;; gcl_of T)
 | (stmt.ite b S T)  :=
   gcl.stmt.choice [
-    gcl.assert b ;; gcl_of S,
-    gcl.assert (λs, ¬ b s) ;; gcl_of T]
+    gcl.stmt.assert b ;; gcl_of S,
+    gcl.stmt.assert (λs, ¬ b s) ;; gcl_of T]
 | (stmt.while b S)  :=
   gcl.stmt.loop (
-    gcl.assert b ;;
+    gcl.stmt.assert b ;;
     gcl_of S) ;;
   gcl.stmt.assert (λs, ¬ b s)
 
@@ -213,7 +213,7 @@ show (S₁, s) ⟹ t ↔ (S₃, s) ⟹ t, from
 lemma big_step_equiv.skip_assign_id {x} :
   stmt.assign x (λs, s x) ≈ stmt.skip :=
 begin
-  intros s t; apply iff.intro; intro h,
+  intros s t, apply iff.intro; intro h,
   { cases' h,
     simp, },
   { cases' h,
@@ -223,7 +223,7 @@ end
 lemma big_step_equiv.seq_skip_left {S : stmt} :
   stmt.skip ;; S ≈ S :=
 begin
-  intros s t; apply iff.intro; intro h,
+  intros s t, apply iff.intro; intro h,
   { cases' h,
     cases' h_1,
     exact h, },
@@ -235,7 +235,7 @@ end
 lemma big_step_equiv.seq_skip_right {S : stmt} :
   S ;; stmt.skip ≈ S :=
 begin
-  intros s t; apply iff.intro; intro h,
+  intros s t, apply iff.intro; intro h,
   { cases' h,
     cases' h_1,
     exact h, },
@@ -247,10 +247,10 @@ end
 lemma big_step_equiv.ite_seq_while {b} {S : stmt} :
   stmt.ite b (S ;; stmt.while b S) stmt.skip ≈ stmt.while b S :=
 begin
-  intros s t; apply iff.intro; intro h,
+  intros s t, apply iff.intro; intro h,
   { cases' h; cases' h,
     { apply big_step.while_true; assumption, },
-    { apply big_step.while_false; assumption, } },
+    { apply big_step.while_false, assumption, } },
   { cases' h,
     { apply big_step.ite_true,
       { exact hcond, },
@@ -268,54 +268,54 @@ lemma big_step_equiv.seq_congr {S₁ S₂ T₁ T₂ : stmt} (hS : S₁ ≈ S₂)
     (hT : T₁ ≈ T₂) :
   S₁ ;; T₁ ≈ S₂ ;; T₂ :=
 begin
-  intros s t; apply iff.intro; intro h,
+  intros s t, apply iff.intro; intro h,
   { cases' h,
     apply big_step.seq,
-    { rw ←hS; assumption, },
-    { rw ←hT; assumption, } },
+    { rw ←hS, assumption, },
+    { rw ←hT, assumption, } },
   { cases' h,
     apply big_step.seq,
-    { rw hS; assumption, },
-    { rw hT; assumption, } }
+    { rw hS, assumption, },
+    { rw hT, assumption, } }
 end
 
 lemma big_step_equiv.ite_congr {b} {S₁ S₂ T₁ T₂ : stmt} (hS : S₁ ≈ S₂)
     (hT : T₁ ≈ T₂) :
   stmt.ite b S₁ T₁ ≈ stmt.ite b S₂ T₂ :=
 begin
-  intros s t; apply iff.intro; intro h,
+  intros s t, apply iff.intro; intro h,
   { cases' h,
     { apply big_step.ite_true,
       { exact hcond, },
-      { rw ←hS; assumption, } },
+      { rw ←hS, assumption, } },
     { apply big_step.ite_false,
       { exact hcond, },
-      { rw ←hT; assumption, } } },
+      { rw ←hT, assumption, } } },
   { cases' h,
     { apply big_step.ite_true,
       { exact hcond, },
-      { rw hS; assumption, } },
+      { rw hS, assumption, } },
     { apply big_step.ite_false,
       { exact hcond, },
-      { rw hT; assumption, } } }
+      { rw hT, assumption, } } }
 end
 
 lemma denote_equiv.while_congr {b} {S₁ S₂ : stmt} (hS : S₁ ≈ S₂) :
   stmt.while b S₁ ≈ stmt.while b S₂ :=
 begin
-  intros s t; apply iff.intro; intro h,
+  intros s t, apply iff.intro; intro h,
   { induction' h,
     { apply big_step.while_true,
       { exact hcond, },
-      { rw ←hS; assumption, },
-      { apply ih_h_1; assumption, } },
-    { apply big_step.while_false; assumption, } },
+      { rw ←hS, assumption, },
+      { apply ih_h_1, assumption, } },
+    { apply big_step.while_false, assumption, } },
   { induction' h,
     { apply big_step.while_true,
       { exact hcond, },
-      { rw hS; assumption, },
-      { apply ih_h_1; assumption, } },
-    { apply big_step.while_false; assumption, } }
+      { rw hS, assumption, },
+      { apply ih_h_1, assumption, } },
+    { apply big_step.while_false, assumption, } }
 end
 
 end LoVe

@@ -34,7 +34,19 @@ the work that remains to be done. -/
 
 lemma GAUSS_correct (n₀ : ℕ) :
   {* λs, s "n" = n₀ *} GAUSS {* λs, s "r" = sum_upto n₀ *} :=
-sorry
+show {* λs, s "n" = n₀ *}
+     stmt.assign "r" (λs, 0) ;;
+     stmt.while_inv (λs, s "r" + sum_upto (s "n") = sum_upto n₀) (λs, s "n" ≠ 0)
+       (stmt.assign "r" (λs, s "r" + s "n") ;;
+        stmt.assign "n" (λs, s "n" - 1))
+     {* λs, s "r" = sum_upto n₀ *}, from
+  begin
+    vcg; intro s; simp,
+    { cases' s "n"; simp, intro h,
+      simp [sum_upto, ←add_assoc, nat.succ_eq_add_one] at *,
+      exact h, },
+    all_goals { intro h, simp [h, sum_upto] },
+  end
 
 /-! 1.2. The following WHILE program is intended to compute the product of `n`
 and `m`, leaving the result in `r`. Prove its correctness using `vcg`.
@@ -50,7 +62,21 @@ stmt.while (λs, s "n" ≠ 0)
 
 lemma MUL_correct (n₀ m₀ : ℕ) :
   {* λs, s "n" = n₀ ∧ s "m" = m₀ *} MUL {* λs, s "r" = n₀ * m₀ *} :=
-sorry
+show {* λs, s "n" = n₀ ∧ s "m" = m₀ *}
+     stmt.assign "r" (λs, 0) ;;
+     stmt.while_inv (λs, s "r" + s "n" * s "m" = n₀ * m₀) (λs, s "n" ≠ 0)
+       (stmt.assign "r" (λs, s "r" + s "m") ;;
+       stmt.assign "n" (λs, s "n" - 1))
+     {* λs, s "r" = n₀ * m₀ *}, from
+  begin
+    vcg; intro s; simp,
+    { cases' s "n"; simp, intro h,
+      simp [nat.succ_eq_add_one, add_mul] at h,
+      simp [add_comm (x * s "m") (s "m"), ←add_assoc] at h,
+      exact h, },
+    { intro h, simp [h], },
+    { intros h₁ h₂, simp [h₁, h₂], }
+  end
 
 
 /-! ## Question 2: Hoare Triples for Total Correctness -/
@@ -68,27 +94,54 @@ namespace total_hoare
 lemma consequence {P P' Q Q' : state → Prop} {S}
     (hS : [* P *] S [* Q *]) (hP : ∀s, P' s → P s) (hQ : ∀s, Q s → Q' s) :
   [* P' *] S [* Q' *] :=
-sorry
+begin
+  intros s hs',
+  have hs : P s := hP s hs',
+  cases' hS s hs with t,
+  cases' h with hSt ht,
+  apply exists.intro t, apply and.intro,
+  { exact hSt, },
+  { exact hQ t ht, }
+end
 
 /-! 2.2. Prove the rule for `skip`. -/
 
 lemma skip_intro {P} :
   [* P *] stmt.skip [* P *] :=
-sorry
+begin
+  intros s hs,
+  apply exists.intro s, apply and.intro,
+  { exact big_step.skip, },
+  { exact hs, }
+end
 
 /-! 2.3. Prove the rule for `assign`. -/
 
 lemma assign_intro {P : state → Prop} {x} {a : state → ℕ} :
   [* λs, P (s{x ↦ a s}) *] stmt.assign x a [* P *] :=
-sorry
+begin
+  intros s hs,
+  apply exists.intro (s{x ↦ a s}), apply and.intro,
+  { exact big_step.assign, },
+  { exact hs, }
+end
 
 /-! 2.4. Prove the rule for `seq`. -/
 
 lemma seq_intro {P Q R S T} (hS : [* P *] S [* Q *]) (hT : [* Q *] T [* R *]) :
   [* P *] S ;; T [* R *] :=
-sorry
+begin
+  intros s hs,
+  cases' hS s hs with r,
+  cases' h with hSr hr,
+  cases' hT r hr with t,
+  cases' h with hTt ht,
+  apply exists.intro t, apply and.intro,
+  { apply big_step.seq; assumption, },
+  { exact ht, }
+end
 
-/-! 2.5. Complete the proof of the rule for `ite`.
+/-! 2.5. Comphavee the proof of the rule for `ite`.
 
 Hint: This requires a case distinction on the truth value of `b s`. -/
 
@@ -96,7 +149,20 @@ lemma ite_intro {b P Q : state → Prop} {S T}
     (hS : [* λs, P s ∧ b s *] S [* Q *])
     (hT : [* λs, P s ∧ ¬ b s *] T [* Q *]) :
   [* P *] stmt.ite b S T [* Q *] :=
-sorry
+begin
+  intros s hs,
+  cases' classical.em (b s) with hcond hcond,
+  { cases' hS s (and.intro hs hcond) with t,
+    cases' h with hSt ht,
+    apply exists.intro t, apply and.intro,
+    { apply big_step.ite_true; assumption, },
+    { exact ht, } },
+  { cases' hT s (and.intro hs hcond) with t,
+    cases' h with hTt ht,
+    apply exists.intro t, apply and.intro,
+    { apply big_step.ite_false; assumption, },
+    { exact ht, } }
+end
 
 /-! 2.6 (**optional**). Try to prove the rule for `while`.
 
@@ -119,12 +185,26 @@ lemma while_var_intro_aux {b : state → Prop} (I : state → Prop) (V : state �
   {S} (h_inv : ∀v₀, [* λs, I s ∧ b s ∧ V s = v₀ *] S [* λs, I s ∧ V s < v₀ *]) :
   ∀v₀ s, V s = v₀ → I s → ∃t, (stmt.while b S, s) ⟹ t ∧ I t ∧ ¬ b t
 | v₀ s V_eq hs :=
-sorry
+  begin
+    cases' classical.em (b s) with hcond hcond,
+    { cases' h_inv v₀ s (and.intro hs (and.intro hcond V_eq)),
+      cases' h with hSw h, cases' h with hw V_le,
+      cases' while_var_intro_aux (V w) w (by refl) hw with t,
+      cases' h with hwt h, cases' h with ht hncond,
+      apply exists.intro t, repeat { apply and.intro },
+      { apply big_step.while_true; assumption, },
+      all_goals { assumption }, },
+    { apply exists.intro s, repeat { apply and.intro }; try { assumption },
+      apply big_step.while_false, exact hcond, }
+  end
 
 lemma while_var_intro {b : state → Prop} (I : state → Prop) (V : state → ℕ) {S}
-  (hinv : ∀v₀, [* λs, I s ∧ b s ∧ V s = v₀ *] S [* λs, I s ∧ V s < v₀ *]) :
+  (h_inv : ∀v₀, [* λs, I s ∧ b s ∧ V s = v₀ *] S [* λs, I s ∧ V s < v₀ *]) :
   [* I *] stmt.while b S [* λs, I s ∧ ¬ b s *] :=
-sorry
+begin
+  intro s,
+  exact while_var_intro_aux I V h_inv (V s) s (by refl),
+end
 
 end total_hoare
 
