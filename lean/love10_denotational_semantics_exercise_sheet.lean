@@ -17,14 +17,29 @@ namespace LoVe
 lemma monotone_comp {α β : Type} [partial_order α] (f g : α → set (β × β))
     (hf : monotone f) (hg : monotone g) :
   monotone (λa, f a ◯ g a) :=
-sorry
+begin
+  intros a₁ a₂ ha b hb,
+  cases' hb with c, cases' h with hfb hgb,
+  apply exists.intro c, apply and.intro,
+  { apply hf a₁ a₂ ha,
+    exact hfb, },
+  { apply hg a₁ a₂ ha,
+    exact hgb, }
+end
 
 /-! 1.2. Prove its cousin. -/
 
 lemma monotone_restrict {α β : Type} [partial_order α] (f : α → set (β × β))
     (p : β → Prop) (hf : monotone f) :
   monotone (λa, f a ⇃ p) :=
-sorry
+begin
+  intros a₁ a₂ ha b hb,
+  cases' hb with hfb hpb,
+  apply and.intro,
+  { apply hf a₁ a₂ ha,
+    exact hfb, },
+  { exact hpb, }  
+end
 
 
 /-! ## Question 2: Regular Expressions
@@ -80,13 +95,24 @@ def rel_of_regex {α : Type} : regex (set (α × α)) → set (α × α)
 | regex.nothing        := ∅
 | regex.empty          := Id
 | (regex.atom s)       := s
--- enter the missing cases here
+| (regex.concat r₁ r₂) := rel_of_regex r₁ ◯ rel_of_regex r₂
+| (regex.alt r₁ r₂)    := rel_of_regex r₁ ∪ rel_of_regex r₂
+| (regex.star r)       := lfp (λX, (rel_of_regex r ◯ X ) ∪ Id)
 
 /-! 2.2. Prove the following recursive equation about your definition. -/
 
 lemma rel_of_regex_star {α : Type} (r : regex (set (α × α))) :
   rel_of_regex (regex.star r) =
   rel_of_regex (regex.alt (regex.concat r (regex.star r)) regex.empty) :=
-sorry
+begin
+  apply lfp_eq,
+  intros a₁ a₂ ha,
+  apply monotone_union,
+  { apply monotone_comp,
+    { exact monotone_const _, },
+    { exact monotone_id, } },
+  { exact monotone_const _, },
+  { exact ha, }
+end
 
 end LoVe
