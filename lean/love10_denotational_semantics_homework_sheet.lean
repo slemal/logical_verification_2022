@@ -48,7 +48,15 @@ question 1.2. -/
 
 def denote : stmt → set (state × state)
 | stmt.skip           := Id
--- enter the missing cases here
+| (stmt.assign x a) :=
+  {st | prod.snd st = (prod.fst st){x ↦ a (prod.fst st)}}
+| (stmt.seq S T)    := denote S ◯ denote T
+| (stmt.unless S b) :=
+  (Id ⇃ b) ∪ (denote S ⇃ (λs, ¬ b s))
+| (stmt.while b S)  :=
+  lfp (λX, ((denote S ◯ X) ⇃ b) ∪ (Id ⇃ (λs, ¬ b s)))
+| (stmt.do_while S b)   :=
+  denote S ◯ lfp (λX, ((denote S ◯ X) ⇃ b) ∪ (Id ⇃ (λs, ¬ b s)))
 
 notation `⟦` S `⟧`:= denote S
 
@@ -57,7 +65,7 @@ notation `⟦` S `⟧`:= denote S
 
 lemma do_while_while (S : stmt) (b : state → Prop) :
   ⟦stmt.do_while S b⟧ = ⟦S⟧ ◯ ⟦stmt.while b S⟧ :=
-sorry
+by refl
 
 /-! 1.3 (4 points). Prove the following lemmas.
 
@@ -68,19 +76,22 @@ what to do about `lfp`. -/
 
 lemma lfp_const {α : Type} [complete_lattice α] (a : α) :
   lfp (λX, a) = a :=
-sorry
+begin
+  apply lfp_eq,
+  apply monotone_const _,
+end
 
 lemma while_false (S : stmt) :
   ⟦stmt.while (λ_, false) S⟧ = Id :=
-sorry
+by simp [denote, restrict, lfp_const]
 
 lemma comp_Id {α : Type} (r : set (α × α)) :
   r ◯ Id = r :=
-sorry
+by simp [comp]
 
 lemma do_while_false (S : stmt) :
   ⟦stmt.do_while S (λ_, false)⟧ = ⟦S⟧ :=
-sorry
+by simp [denote, restrict, lfp_const, comp_Id]
 
 end do_while
 
@@ -117,7 +128,11 @@ def Union {α : Type} (s : ℕ → set α) : set α :=
 
 lemma Union_le {α : Type} {s : ℕ → set α} (A : set α) (h : ∀i, s i ≤ A) :
   Union s ≤ A :=
-sorry
+begin
+  intros x hx,
+  cases' hx with i hi,
+  apply h i hi,
+end 
 
 /-! A continuous function `f` is a function that commutes with the union of any
 monotone sequence `s`: -/
@@ -144,21 +159,39 @@ lemma Union_bi_seq {α : Type} (A B : set α) (ha : A ≤ B) :
   Union (bi_seq A B) = B :=
 begin
   apply le_antisymm,
-  { sorry },
-  { sorry }
+  { apply Union_le,
+    intro i, cases' i,
+    { exact ha, },
+    { exact le_refl _, } },
+  { intros x hx,
+    apply exists.intro 1,
+    exact hx, }
 end
 
 lemma monotone_of_continuous {α : Type} (f : set α → set α)
     (hf : continuous f) :
   monotone f :=
-sorry
+begin
+  intros a b hab,
+  intros x hx,
+  rw ←Union_bi_seq a b hab,
+  rw hf (bi_seq a b) (monotone_bi_seq a b hab),
+  apply exists.intro 0,
+  simp [bi_seq, hx],
+end
 
 /-! 2.2 (1 bonus point). Provide the following proof, using a similar case
 distinction as for `monotone_bi_seq` above. -/
 
 lemma monotone_iterate {α : Type} (f : set α → set α) (hf : monotone f) :
-  monotone (λi, (f ^^ i) ∅) :=
-sorry
+  monotone (λi, (f ^^ i) ∅)
+| 0       _       _   := by simp [iterate]
+| (n + 1) (m + 1) hmn :=
+  begin
+    apply hf,
+    apply monotone_iterate n m,
+    linarith,
+  end
 
 /-! 2.3 (1 bonus point). Prove the main theorem. A proof sketch is given below.
 
@@ -173,6 +206,26 @@ natural number `i`, on which you can perform induction. We also need the lemma
 
 lemma lfp_Kleene {α : Type} (f : set α → set α) (hf : continuous f) :
   lfp f = Union (λi, (f ^^ i) ∅) :=
-sorry
+begin
+  apply le_antisymm,
+  { apply lfp_le f,
+    rw hf _ (monotone_iterate f (monotone_of_continuous f hf)),
+    apply Union_le,
+    intros i x hx,
+    apply exists.intro (i + 1),
+    simp [iterate, hx], },
+  { apply Union_le (lfp f),
+    intros i,
+    induction' i,
+    { intros x hx,
+      apply false.elim _,
+      exact hx, },
+    { simp [iterate],
+      have hf' := monotone_of_continuous f hf,
+      rw lfp_eq f hf',
+      apply hf',
+      apply ih,
+      exact hf, } }
+end
 
 end LoVe
