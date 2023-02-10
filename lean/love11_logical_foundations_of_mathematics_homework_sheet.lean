@@ -34,13 +34,19 @@ below all take `[decidable_eq α]` as type class argument.
 @[instance] def multiset.rel (α : Type) [decidable_eq α] : setoid (list α) :=
 { r     := λas bs, ∀x, list.count x as = list.count x bs,
   iseqv :=
-    sorry }
+    begin
+      repeat { apply and.intro },
+      { intros as x, refl, },
+      { intros as bs h x, simp [←(h x)], },
+      { intros as bs cs hab hbc x,
+        simp [hab x, hbc x], }
+    end }
 
 /-! 1.2 (1 point). Define the type of multisets as the quotient over the
 relation `multiset.rel`. -/
 
 def multiset (α : Type) [decidable_eq α] : Type :=
-sorry
+quotient (multiset.rel α) 
 
 /-! 1.3 (3 points). Now we have a type `multiset α` but no operations on it.
 Basic operations on multisets include the empty multiset (`∅`), the singleton
@@ -52,36 +58,68 @@ Fill in the `sorry` placeholders below to implement the basic multiset
 operations. -/
 
 def multiset.empty {α : Type} [decidable_eq α] : multiset α :=
-sorry
+⟦[]⟧
 
 def multiset.singleton {α : Type} [decidable_eq α] (a : α) : multiset α :=
-sorry
+⟦[a]⟧
 
 def multiset.union {α : Type} [decidable_eq α] :
   multiset α → multiset α → multiset α :=
 quotient.lift₂
-  sorry
-  sorry
+  (λ as bs, ⟦as ++ bs⟧ )
+  begin
+    intros a₁ a₂ b₁ b₂ h₁ h₂,
+    apply quotient.sound,
+    intro x,
+    simp [h₁ x, h₂ x],
+  end
 
 /-! 1.4 (4 points). Prove that `multiset.union` is commutative and associative,
 and has `multiset.empty` as identity element. -/
 
 lemma multiset.union_comm {α : Type} [decidable_eq α] (A B : multiset α) :
   multiset.union A B = multiset.union B A :=
-sorry
+begin
+  apply quotient.induction_on A,
+  apply quotient.induction_on B,
+  intros a b,
+  apply quotient.sound,
+  intro x,
+  simp [add_comm],
+end
 
 lemma multiset.union_assoc {α : Type} [decidable_eq α] (A B C : multiset α) :
   multiset.union (multiset.union A B) C =
   multiset.union A (multiset.union B C) :=
-sorry
+begin
+  apply quotient.induction_on A,
+  apply quotient.induction_on B,
+  apply quotient.induction_on C,
+  intros a b c,
+  apply quotient.sound,
+  intro x,
+  simp [add_assoc],
+end
 
 lemma multiset.union_iden_left {α : Type} [decidable_eq α] (A : multiset α) :
   multiset.union multiset.empty A = A :=
-sorry
+begin
+  apply quotient.induction_on A,
+  intro a,
+  apply quotient.sound,
+  intro x,
+  simp,
+end
 
 lemma multiset.union_iden_right {α : Type} [decidable_eq α] (A : multiset α) :
   multiset.union A multiset.empty = A :=
-sorry
+begin
+  apply quotient.induction_on A,
+  intro a,
+  apply quotient.sound,
+  intro x,
+  simp,
+end
 
 
 /-! ## Question 2 (2 bonus points): Nonempty Types
@@ -109,8 +147,7 @@ resembles a lemma proved by `sorry`, just without the warning. -/
 lets us derive `false`. -/
 
 lemma proof_of_false :
-  false :=
-sorry
+  false := classical.choice (Sort_nonempty false)
 
 /-! 2.2 (1 bonus point). Prove that even the following weaker axiom leads to a
 contradiction. Of course, you may not use the axiom or the lemma from 3.1.
@@ -121,7 +158,9 @@ axiom Type_nonempty (α : Type _) :
   nonempty α
 
 lemma proof_of_false₂ :
-  false :=
-sorry
+  false := subtype.property
+          (classical.choice
+          (Type_nonempty
+          (@subtype Type (λ_, false)))),
 
 end LoVe
