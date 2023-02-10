@@ -161,6 +161,6 @@ lemma proof_of_false₂ :
   false := subtype.property
           (classical.choice
           (Type_nonempty
-          (@subtype Type (λ_, false)))),
+          (@subtype Type (λ_, false))))
 
 end LoVe
