@@ -30,11 +30,26 @@ def btree.graft {α : Type} : btree α → btree α → btree α
 
 lemma btree.graft_assoc {α : Type} (t u v : btree α) :
   btree.graft (btree.graft t u) v = btree.graft t (btree.graft u v) :=
-sorry
+begin
+  induction' t,
+  { refl, },
+  case node : a l r ihl ihr { 
+    simp [btree.graft], apply and.intro,
+    { apply ihl, },
+    { apply ihr, }
+     }
+end
 
 lemma btree.graft_empty {α : Type} (t : btree α) :
   btree.graft t btree.empty = t :=
-sorry
+begin
+  induction' t,
+  { refl, },
+  case node : a l r ihl ihr { 
+    simp [btree.graft], apply and.intro,
+    { apply ihl, },
+    { apply ihr, } }
+end
 
 /-! 1.2. Declare btree an instance of `add_monoid` using `graft` as addition
 operator. -/
@@ -42,7 +57,11 @@ operator. -/
 #print add_monoid
 
 @[instance] def btree.add_monid {α : Type} : add_monoid (btree α) :=
-sorry
+{ add       := btree.graft,
+  add_assoc := btree.graft_assoc,
+  zero      := btree.empty,
+  add_zero  := btree.graft_empty,
+  zero_add  := by intro a; refl, }
 
 /-! 1.3. Explain why `btree` with `graft` as addition cannot be declared an
 instance of `add_group`. -/
@@ -54,7 +73,11 @@ instance of `add_group`. -/
 
 lemma btree.add_left_neg_counterexample :
   ∃x : btree ℕ, ∀y : btree ℕ, btree.graft y x ≠ btree.empty :=
-sorry
+begin
+  apply exists.intro (btree.node 0 btree.empty btree.empty),
+  intro y,
+  cases' y; simp [btree.graft],
+end
 
 
 /-! ## Question 2: Multisets and Finsets
@@ -75,14 +98,26 @@ Hints:
 
 lemma multiset.elems_mirror (t : btree ℕ) :
   multiset.elems (mirror t) = multiset.elems t :=
-sorry
+begin
+  induction' t,
+  { refl, },
+  case node : a l r ihl ihr {
+    simp [mirror, multiset.elems],
+    simp [ihl, ihr, multiset.union_comm], }
+end
 
 /-! 2.2. Prove that the finite set of nodes does not change when mirroring a
 tree. -/
 
 lemma finset.elems_mirror (t : btree ℕ) :
   finset.elems (mirror t) = finset.elems t :=
-sorry
+begin
+  induction' t,
+  { refl, },
+  case node : a l r ihl ihr {
+    simp [mirror, finset.elems],
+    simp [ihl, ihr, finset.union_comm], }
+end
 
 /-! 2.3. Show that this does not hold for the list of nodes by providing a
 tree `t` for which `nodes_list t ≠ nodes_list (mirror t)`.
@@ -90,7 +125,8 @@ tree `t` for which `nodes_list t ≠ nodes_list (mirror t)`.
 If you define a suitable counterexample, the proof below will succeed. -/
 
 def rotten_tree : btree ℕ :=
-sorry
+btree.node 0 (btree.node 1 btree.empty btree.empty)
+  (btree.node 0 btree.empty btree.empty)
 
 #eval list.elems rotten_tree
 #eval list.elems (mirror rotten_tree)
@@ -99,7 +135,7 @@ lemma list.elems_mirror_counterexample :
   ∃t : btree ℕ, list.elems t ≠ list.elems (mirror t) :=
 begin
   apply exists.intro rotten_tree,
-  exact dec_trivial
+  exact dec_trivial,
 end
 
 end LoVe
